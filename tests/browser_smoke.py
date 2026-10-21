@@ -59,9 +59,9 @@ def main():
     parser.add_argument("--legacy-headless", action="store_true", help="For Chromium versions supporting --headless=old")
     parser.add_argument("--width", type=int, default=1440)
     parser.add_argument("--height", type=int, default=1200)
-    parser.add_argument("--kind", choices=["hono", "hubradar", "radar", "extended", "invalid"], required=True)
+    parser.add_argument("--kind", choices=["hono", "hubradar", "radar", "readme", "extended", "invalid"], required=True)
     parser.add_argument("--theme", choices=["light", "dark"], default="light")
-    parser.add_argument("--capture", choices=["top", "flow", "states"], default="flow")
+    parser.add_argument("--capture", choices=["top", "flow", "states", "workflow"], default="flow")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
@@ -77,7 +77,8 @@ const originalOpen=XMLHttpRequest.prototype.open;
 XMLHttpRequest.prototype.open=function(method,url,...rest){hubradarTestNetwork.push(String(url));return originalOpen.call(this,method,url,...rest)};
 </script>"""
     source = args.report.read_text(encoding="utf-8")
-    source = source.replace('<script id="hubradar-mermaid">', bootstrap + '<script id="hubradar-mermaid">', 1)
+    first_script = '<script id="hubradar-mermaid">' if 'id="hubradar-mermaid"' in source else '<script id="hubradar-interactions">'
+    source = source.replace(first_script, bootstrap + first_script, 1)
     checks = Path(__file__).with_name("browser_report_checks.js").read_text(encoding="utf-8")
     injection = f"<script>window.hubradarTestOptions={options};\n{checks}</script>"
     # A JS dependency can itself contain "</body>". Only modify the final HTML tag.

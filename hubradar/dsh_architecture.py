@@ -58,21 +58,22 @@ def escape(s: Any) -> str:
     return html.escape(str(s) if s is not None else "")
 
 
-def fit_text(text: Any, max_px: float, font_size: float = 11.5) -> str:
+def fit_text(text: Any, max_px: float, font_size: float = 11.5, *, preserve_tokens: bool = False) -> str:
     """Ensure text fits visually inside pixel budget; truncate with ellipsis if needed."""
     if not text:
         return ""
     text_str = str(text).strip()
-    widths = [font_size if ord(ch) > 127 else font_size * 0.6 for ch in text_str]
+    units = re.findall(r"\w+|\s+|[^\w\s]", text_str) if preserve_tokens else text_str
+    widths = [sum(font_size if ord(ch) > 127 else font_size * 0.6 for ch in unit) for unit in units]
     if sum(widths) <= max_px:
         return text_str
     w = 0.0
     res = []
-    for ch, ch_w in zip(text_str, widths):
+    for unit, ch_w in zip(units, widths):
         if w + ch_w > max_px - font_size:
             return "".join(res).rstrip() + "…"
         w += ch_w
-        res.append(ch)
+        res.append(unit)
     return text_str
 
 
@@ -373,6 +374,9 @@ def generate_dsh_svg(spec: Dict[str, Any]) -> str:
 
             card_group.append(f'    <g transform="translate({cx}, {cy})" data-card-id="{escape(card["id"])}">')
             card_group.append(
+                f'      <title>{escape(c_title)} - {escape(c_desc)}{": " + escape(code_pill) if code_pill else ""}</title>'
+            )
+            card_group.append(
                 f'      <rect width="{cw}" height="{ch}" rx="8" fill="{palette["bg"]}" '
                 f'stroke="{palette["stroke"]}" stroke-width="1.2" class="card-rect"/>'
             )
@@ -403,7 +407,7 @@ def generate_dsh_svg(spec: Dict[str, Any]) -> str:
             # Code pill inside card - positioned relative to content or bottom
             if code_pill:
                 pill_y, pill_h = card["pill_y"], card["pill_h"]
-                safe_pill = fit_text(code_pill, cw - 36)
+                safe_pill = fit_text(code_pill, cw - 36, 10.5, preserve_tokens=True)
                 card_group.append(
                     f'      <rect x="12" y="{pill_y}" width="{cw - 24}" height="{pill_h}" rx="4" '
                     f'fill="{palette["pill_bg"]}" stroke="{palette["stroke"]}" stroke-width="0.8"/>'

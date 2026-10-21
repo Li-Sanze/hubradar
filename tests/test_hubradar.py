@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 from hubradar import finalize, prepare, radar
 from hubradar.cli import main
-from hubradar.dsh_architecture import compile_dsh_spec, generate_dsh_svg, get_example_spec
+from hubradar.dsh_architecture import compile_dsh_spec, fit_text, generate_dsh_svg, get_example_spec
 from hubradar.fixtures import build_hono_architecture_spec, build_hubradar_architecture_spec
 from hubradar.html_report import render_file, render_markdown
 
@@ -214,6 +214,35 @@ class ArchitectureTests(unittest.TestCase):
         pill = group.find('s:text[@class="code-pill"]', self.NS)
         title = group.find('s:text[@class="card-title"]', self.NS)
         self.assertGreater(float(pill.get("y")), float(title.get("y")) + 30)
+
+    def test_card_titles_preserve_full_text_and_escape_markup(self):
+        for code in (None, "", 'graph.add_node("<script>&")'):
+            with self.subTest(code=code):
+                spec = self.spec()
+                card = spec["layers"][0]["cards"][0]
+                card.update(title='完整标题 <script> & "节点"' * 5, desc="完整描述 <desc> & 证据" * 5,
+                            code_pill=code, href="https://example.com/source#L1")
+                root = ET.fromstring(generate_dsh_svg(spec))
+                group = root.find('.//s:g[@data-card-id="node-0"]', self.NS)
+                expected = f'{card["title"]} - {card["desc"]}' + (f": {code}" if code else "")
+                self.assertEqual(group.find("s:title", self.NS).text, expected)
+                self.assertEqual(len(group.find("s:title", self.NS)), 0)
+                self.assertFalse(root.findall(".//s:script", self.NS))
+                self.assertNotEqual(group.find('s:text[@class="card-title"]', self.NS).text, card["title"])
+                # Unlinked cards also expose their complete text.
+                self.assertEqual(root.find('.//s:g[@data-card-id="node-1"]/s:title', self.NS).text,
+                                 "服务 1 - 职责说明")
+
+    def test_code_pills_use_actual_font_size_and_keep_identifiers_whole(self):
+        spec = self.spec()
+        code = "top_defs(root, lang) & nx.DiGraph()"
+        spec["layers"][0]["cards"][0]["code_pill"] = code
+        root = ET.fromstring(generate_dsh_svg(spec))
+        pill = root.find('.//s:g[@data-card-id="node-0"]/s:text[@class="code-pill"]', self.NS)
+        self.assertEqual(pill.text, code)
+        self.assertEqual(fit_text("nx.DiGraph()", 65, 10.5, preserve_tokens=True), "nx.…")
+        self.assertEqual(fit_text("VeryLongIdentifier()", 65, 10.5, preserve_tokens=True), "…")
+        self.assertEqual(fit_text("短代码()", 65, 10.5, preserve_tokens=True), "短代码()")
 
     def test_semantic_edges_are_orthogonal_and_use_distinct_gutter_lanes(self):
         spec = self.spec()
@@ -517,6 +546,15 @@ print("<script>alert('not executable')</script>")
         self.assertNotIn('id="hubradar-mermaid"', page)
         # Should be lightweight (< 50KB) instead of 3.6MB
         self.assertLess(len(page.encode("utf-8")), 50000)
+
+    def test_readme_four_stage_workflow_stays_lightweight(self):
+        source = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
+        self.assertNotRegex(source, r"(?m)^\s*```mermaid\b")
+        page = render_markdown(source)
+        self.assertNotIn('id="hubradar-mermaid"', page)
+        self.assertLess(len(page.encode("utf-8")), 50000)
+        for stage in ("领域发现", "证据准备", "Agent 提炼", "核验与交付"):
+            self.assertIn(stage, page)
 
     def test_dsh_invalid_json_schema_and_unknown_labels_show_error_with_source(self):
         for lang in ("dsh", "architecture", "dsh-architecture"):

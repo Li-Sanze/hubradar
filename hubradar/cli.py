@@ -34,7 +34,7 @@ def parser():
     html.add_argument("markdown", type=Path)
     html.add_argument("-o", "--out", type=Path, help="默认同目录 index.html")
     html.add_argument("--title", help="可选页面标题")
-    arch = commands.add_parser("arch", help="生成 DSH 盒模型架构 SVG（支持 JSON spec 或预置模板）")
+    arch = commands.add_parser("arch", help="生成分层矢量架构图（支持 JSON spec 或预置模板）")
     arch.add_argument("spec", nargs="?", type=Path, help="兼容位置参数：JSON 文件路径或 hubradar/hono 样例标签")
     source = arch.add_mutually_exclusive_group()
     source.add_argument("--spec", dest="spec_path", type=Path, help="架构 spec JSON 文件；路径不存在时返回 2")

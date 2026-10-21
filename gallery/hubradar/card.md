@@ -1,7 +1,7 @@
 # Li-Sanze/hubradar @ `93ef1e15` · 3 分钟卡片
 > 覆盖：full_scan（源码 10 文件）· 证据包约 14,505 tokens / 全量约 24,345 · 结论校验 16/16 通过
 
-**本质**：HubRadar = 静态 AST 拓扑提取 + 引文不变式交叉严格校验 + 领域技术雷达探测 + DSH 交互式矢量架构白皮书引擎。 [源码事实✓ cli.py#L44](https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/cli.py#L44-L88) [源码事实✓ prepare.py#L166](https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/prepare.py#L166-L248) [源码事实✓ finalize.py#L153](https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/finalize.py#L153-L180) [源码事实✓ dsh_architecture.py#L78](https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/dsh_architecture.py#L78-L150)
+**本质**：HubRadar = 静态 AST 拓扑提取 + 引文不变式交叉严格校验 + 领域技术雷达探测 + 分层矢量架构图与离线白皮书引擎。 [源码事实✓ cli.py#L44](https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/cli.py#L44-L88) [源码事实✓ prepare.py#L166](https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/prepare.py#L166-L248) [源码事实✓ finalize.py#L153](https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/finalize.py#L153-L180) [源码事实✓ dsh_architecture.py#L78](https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/dsh_architecture.py#L78-L150)
 
 **解决**：告别盲目造轮子与营销刷星，3 分钟看穿任意开源代码库的真实架构、承重模式与踩坑避坑决策，输出零依赖交互白皮书。  
 **不解决**：不替代完整工程代码生成，不运行不可信的目标源码（坚持严格只读 AST 静态提取）。
@@ -11,7 +11,7 @@
 {
   "slug": "hubradar",
   "title": "HubRadar 核心系统架构与全景分层 (93ef1e1)",
-  "subtitle": "统一 CLI / 双 Skill 接入 · 静态 AST 与引文不变式验证内核 · DSH 矢量渲染与离线打包底座",
+  "subtitle": "统一 CLI / 双 Skill 接入 · 静态 AST 与引文不变式验证内核 · 分层矢量渲染与离线打包",
   "layers": [
     {
       "id": "presentation",
@@ -79,19 +79,19 @@
       "cards": [
         {
           "id": "svg",
-          "title": "DSH 盒模型矢量渲染编译器 (dsh_architecture.py)",
-          "desc": "1000px 黄金视口 · 正交连线避让 · 代码药丸与 GitHub SHA 点击直达",
+          "title": "分层矢量架构图编译器 (dsh_architecture.py)",
+          "desc": "1000px 视口 · 正交连线 · 代码胶囊与 SHA 源码锚点",
           "code_pill": "generate_dsh_svg(spec_data)",
-          "pill_desc": "原生纯 Python 吸收 · 零外部 Node/CLI 依赖",
+          "pill_desc": "Python 标准库实现 · 无 Node/CLI 依赖",
           "color": "emerald",
           "href": "https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/dsh_architecture.py#L78-L150"
         },
         {
           "id": "html",
-          "title": "单文件离线 HTML 白皮书打包人 (html_report.py)",
-          "desc": "Markdown 解析 · Bleach 安全占位内联 · 零脚本纯矢量自适应",
+          "title": "离线 HTML 白皮书打包 (html_report.py)",
+          "desc": "Markdown 解析 · Bleach 安全占位内联 · 单文件交互",
           "code_pill": "render_file(card_md, index_html)",
-          "pill_desc": "彻底剥离 3.4MB mermaid.js 强依赖 · 毫秒级加载与离线归档",
+          "pill_desc": "按需内联 Mermaid · 支持离线归档",
           "color": "purple",
           "href": "https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/html_report.py#L145-L185"
         }
@@ -165,7 +165,7 @@
       }
     ]
   },
-  "summary_note": "纯 Python 原生吸收 · 零 Node/CLI 外部依赖 · 节点点击直达 GitHub 93ef1e1 源码提交行"
+  "summary_note": "Python 标准库生成 SVG · 无 Node/CLI 依赖 · 点击查看固定提交 93ef1e1 源码行"
 }
 ```
 
@@ -177,8 +177,8 @@ flowchart LR
   prepare["ast-grep AST 语法树事实抽取 (prepare.py)"]
   finalize["引文不变式交叉严格校验 (finalize.py)"]
   radar["领域技术雷达探测引擎 (radar.py)"]
-  dsh["DSH 盒模型矢量渲染编译器 (dsh_architecture.py)"]
-  html["单文件离线 HTML 白皮书打包人 (html_report.py)"]
+  dsh["分层矢量架构图编译器 (dsh_architecture.py)"]
+  html["离线 HTML 白皮书打包 (html_report.py)"]
   cli --> prepare
   cli --> radar
   prepare --> finalize

@@ -13,7 +13,14 @@
     const cards = all(".diagram-card"), options = window.hubradarTestOptions;
     const mermaidCards = cards.filter(card => card.querySelector(".mermaid-target"));
     const dshCards = cards.filter(card => card.querySelector(".dsh-svg-target"));
-    check("mermaid_loaded", typeof window.mermaid?.render === "function");
+    check("mermaid_loaded_when_needed", mermaidCards.length
+      ? typeof window.mermaid?.render === "function" : typeof window.mermaid === "undefined");
+    if (options.kind === "readme") {
+      check("readme_has_no_diagram_runtime", cards.length === 0);
+      const workflow = all("article table").find(table => table.textContent.includes("Agent 提炼"));
+      check("four_workflow_stages", workflow?.tBodies[0].rows.length === 4);
+      check("workflow_fits_desktop", innerWidth < 640 || workflow.scrollWidth <= workflow.parentElement.clientWidth + 1);
+    }
     if (options.kind === "invalid") {
       check("syntax_failure_visible", cards.some(card => card.dataset.diagramStatus === "error"
         && card.querySelector(".diagram-source").open && card.querySelector(".diagram-error").textContent.length));
@@ -24,6 +31,15 @@
     if (options.kind === "hubradar") check("dsh_and_mermaid_diagrams", dshCards.length === 1 && mermaidCards.length === 1);
     for (const card of dshCards) {
       check("dsh_source_anchors", all("a.card-anchor", card).length === 8);
+      check("dsh_full_card_titles", all("g[data-card-id]", card).every(group => {
+        const title = group.querySelector(":scope > title")?.textContent || "";
+        const labels = [".card-title", ".card-desc", ".code-pill"]
+          .map(selector => group.querySelector(selector)).filter(Boolean);
+        return title.length > 0 && group.firstElementChild.localName === "title"
+          && labels.every(text => title.includes(text.textContent.replace(/…$/, "")));
+      }));
+      if (options.kind === "hubradar") check("digraph_token_complete",
+        card.querySelector('[data-card-id="prepare"] .code-pill').textContent.includes("DiGraph()"));
       check("dsh_text_inside_cards", all("g[data-card-id]", card).every(group =>
         all("text", group).every(text => inBounds(rect(text), rect(group.querySelector(".card-rect"))))));
     }
@@ -131,7 +147,8 @@
       await window.hubradarDiagramsReady;
     }
     document.documentElement.style.scrollBehavior = "auto";
-    const focus = options.capture === "states" ? document.getElementById("section-3")
+    const focus = options.capture === "workflow" ? all("h3").find(heading => heading.textContent === "四阶段工作流")
+      : options.capture === "states" ? document.getElementById("section-3")
       : options.capture === "flow" ? document.getElementById("section-2") : null;
     if (focus) window.scrollTo({ top: focus.getBoundingClientRect().top + window.scrollY - 12, behavior: "instant" });
     await new Promise(resolve => setTimeout(resolve, 200));

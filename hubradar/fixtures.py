@@ -14,7 +14,7 @@ def build_hubradar_architecture_spec() -> Dict[str, Any]:
     return {
         "slug": "hubradar",
         "title": "HubRadar 核心系统架构与全景分层 (93ef1e1)",
-        "subtitle": "统一 CLI / 双 Skill 接入 · 静态 AST 与引文不变式验证内核 · DSH 矢量渲染与离线打包底座",
+        "subtitle": "统一 CLI / 双 Skill 接入 · 静态 AST 与引文不变式验证内核 · 分层矢量渲染与离线打包",
         "layers": [
             {
                 "id": "presentation",
@@ -82,19 +82,19 @@ def build_hubradar_architecture_spec() -> Dict[str, Any]:
                 "cards": [
                     {
                         "id": "svg",
-                        "title": "DSH 盒模型矢量渲染编译器 (dsh_architecture.py)",
-                        "desc": "1000px 黄金视口 · 正交连线避让 · 代码药丸与 GitHub SHA 点击直达",
+                        "title": "分层矢量架构图编译器 (dsh_architecture.py)",
+                        "desc": "1000px 视口 · 正交连线 · 代码胶囊与 SHA 源码锚点",
                         "code_pill": "generate_dsh_svg(spec_data)",
-                        "pill_desc": "原生纯 Python 吸收 · 零外部 Node/CLI 依赖",
+                        "pill_desc": "Python 标准库实现 · 无 Node/CLI 依赖",
                         "color": "emerald",
                         "href": link("hubradar/dsh_architecture.py", 78, 150),
                     },
                     {
                         "id": "html",
-                        "title": "单文件离线 HTML 白皮书打包人 (html_report.py)",
-                        "desc": "Markdown 解析 · Bleach 安全占位内联 · 零脚本纯矢量自适应",
+                        "title": "离线 HTML 白皮书打包 (html_report.py)",
+                        "desc": "Markdown 解析 · Bleach 安全占位内联 · 单文件交互",
                         "code_pill": "render_file(card_md, index_html)",
-                        "pill_desc": "彻底剥离 3.4MB mermaid.js 强依赖 · 毫秒级加载与离线归档",
+                        "pill_desc": "按需内联 Mermaid · 支持离线归档",
                         "color": "purple",
                         "href": link("hubradar/html_report.py", 145, 185),
                     },
@@ -121,7 +121,7 @@ def build_hubradar_architecture_spec() -> Dict[str, Any]:
                 {"label": "点击直达 GitHub 源码提交行 (Click-to-Source)", "color": "#64748b"},
             ],
         },
-        "summary_note": "纯 Python 原生吸收 · 零 Node/CLI 外部依赖 · 节点点击直达 GitHub 93ef1e1 源码提交行",
+        "summary_note": "Python 标准库生成 SVG · 无 Node/CLI 依赖 · 点击查看固定提交 93ef1e1 源码行",
     }
 
 

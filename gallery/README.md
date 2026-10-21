@@ -2,8 +2,8 @@
 
 本目录存放经真实 dogfood 验证的官方白皮书与雷达产物：
 
-- `hubradar/`：HubRadar 自身的 3 分钟白皮书与 DSH 盒模型矢量架构图（自举 Dogfood，基于固定提交 `93ef1e1`）。
-- `honojs__hono/`：Hono 固定提交 `5ca49b0720755c585c9a9835f0a479ceea36fb52` 的白皮书卡片、facts、宿主综合 JSON 与 DSH 架构图。
+- `hubradar/`：HubRadar 自身的 3 分钟白皮书与分层矢量架构图（真实 Dogfood，基于固定提交 `93ef1e1`）。
+- `honojs__hono/`：外部开源项目 Hono 固定提交 `5ca49b0720755c585c9a9835f0a479ceea36fb52` 的白皮书卡片、facts、宿主综合 JSON 与分层矢量架构图。
 - `code-intel-for-agents/`：领域技术雷达 Markdown 与 JSON。
 - 各目录中的 `index.html` 均由本仓库 HTML 渲染器生成，支持代码锚点点击跳转、无级缩放与深浅色模式切换。
 
