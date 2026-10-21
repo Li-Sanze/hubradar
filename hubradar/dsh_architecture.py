@@ -1,6 +1,6 @@
 """DSH Architecture SVG Generator.
 
-Compiles semantic layers/cards/edges into Fire Skill's C4 box-model geometry
+Compiles semantic layers/cards/edges into layered vector box-model geometry
 (1000px viewport, code pills, numbered badges, orthogonal connectors) with
 Archify's click-to-source anchors and CSS variable theming.
 
