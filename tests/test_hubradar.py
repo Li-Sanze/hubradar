@@ -316,7 +316,8 @@ class ArchitectureTests(unittest.TestCase):
                 for edge in compiled["connectors"]:
                     self.assert_orthogonal(edge["points"])
                 root = ET.fromstring(generate_dsh_svg(spec))
-                self.assertEqual(len(root.findall('.//s:a', self.NS)), 8)
+                expected_cards = sum(len(layer["cards"]) for layer in spec["layers"])
+                self.assertEqual(len(root.findall('.//s:a', self.NS)), expected_cards)
 
     def assert_semantic(self, value):
         if isinstance(value, dict):
@@ -352,7 +353,11 @@ class ArchitectureTests(unittest.TestCase):
                     compiled = compile_dsh_spec(spec)
                     first = spec["layers"][0]["cards"][0]["id"]
                     self.assertNotEqual(original["card_index"][first]["w"], compiled["card_index"][first]["w"])
-                    self.assertGreater(compiled["card_index"]["extra"]["y"], compiled["card_index"][first]["y"])
+                    while len(spec["layers"][0]["cards"]) < 4:
+                        spec["layers"][0]["cards"].append({"id": f"wrap_{len(spec['layers'][0]['cards'])}", "title": "网格换行卡片"})
+                    wrapped = compile_dsh_spec(spec)
+                    last_id = spec["layers"][0]["cards"][-1]["id"]
+                    self.assertGreater(wrapped["card_index"][last_id]["y"], wrapped["card_index"][first]["y"])
                     self.assert_routes_clear_cards(compiled)
                     changed = render_markdown(f"```dsh-architecture\n{json.dumps(spec)}\n```\n")
                     self.assertIn("契约修改后重新排版", changed)

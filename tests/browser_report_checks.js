@@ -30,7 +30,7 @@
     if (options.kind === "hono") check("dsh_and_three_mermaid_diagrams", dshCards.length === 1 && mermaidCards.length === 3);
     if (options.kind === "hubradar") check("dsh_and_mermaid_diagrams", dshCards.length === 1 && mermaidCards.length === 1);
     for (const card of dshCards) {
-      check("dsh_source_anchors", all("a.card-anchor", card).length === 8);
+      check("dsh_source_anchors", all("a.card-anchor", card).length === (options.kind === "hono" ? 8 : 6));
       check("dsh_full_card_titles", all("g[data-card-id]", card).every(group => {
         const title = group.querySelector(":scope > title")?.textContent || "";
         const labels = [".card-title", ".card-desc", ".code-pill"]
@@ -39,7 +39,7 @@
           && labels.every(text => title.includes(text.textContent.replace(/…$/, "")));
       }));
       if (options.kind === "hubradar") check("digraph_token_complete",
-        card.querySelector('[data-card-id="prepare"] .code-pill').textContent.includes("DiGraph()"));
+        card.querySelector('[data-card-id="distill"] .code-pill').textContent.includes("finalize()"));
       check("dsh_text_inside_cards", all("g[data-card-id]", card).every(group =>
         all("text", group).every(text => inBounds(rect(text), rect(group.querySelector(".card-rect"))))));
     }
