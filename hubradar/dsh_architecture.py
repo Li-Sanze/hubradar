@@ -240,7 +240,8 @@ def compile_dsh_spec(spec: Dict[str, Any]) -> Dict[str, Any]:
         items.sort(key=lambda t: t[0])
         count = len(items)
         for rank, (_, ei) in enumerate(items):
-            edge_exit_x[ei] = node["left"] + node["w"] * (rank + 1) / (count + 1)
+            offset = -18 if count > 1 and rank == 0 else (18 if count > 1 and rank == count - 1 else 0)
+            edge_exit_x[ei] = node["left"] + node["w"] * (rank + 1) / (count + 1) + offset
 
     edge_entry_x = {}
     for cid, items in inter_in.items():
@@ -248,7 +249,8 @@ def compile_dsh_spec(spec: Dict[str, Any]) -> Dict[str, Any]:
         items.sort(key=lambda t: t[0])
         count = len(items)
         for rank, (_, ei) in enumerate(items):
-            edge_entry_x[ei] = node["left"] + node["w"] * (rank + 1) / (count + 1)
+            offset = 18 if count > 1 and rank == 0 else (-18 if count > 1 and rank == count - 1 else 0)
+            edge_entry_x[ei] = node["left"] + node["w"] * (rank + 1) / (count + 1) + offset
 
     connectors = result.setdefault("connectors", [])
     if not isinstance(connectors, list):
