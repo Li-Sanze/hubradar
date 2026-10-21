@@ -82,12 +82,13 @@
       await window.hubradarDiagramsReady;
       check("source_unchanged", cards[0].querySelector(".diagram-source code").textContent === originalSource);
     }
-    const svg = document.querySelector(".mermaid-target svg");
+    const svg = document.querySelector(".mermaid-target svg, .dsh-svg-target svg");
     if (svg) {
+      const card = svg.closest(".diagram-card");
       const oldWidth = rect(svg).width;
-      document.querySelector('[data-zoom="0.2"]').click();
+      card.querySelector('[data-zoom="0.2"]').click();
       check("zoom", rect(svg).width > oldWidth);
-      document.querySelector('[data-zoom="0"]').click();
+      card.querySelector('[data-zoom="0"]').click();
       check("fit", rect(svg).width <= svg.closest(".diagram-scroll").clientWidth);
     }
     const details = all("article details");

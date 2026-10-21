@@ -35,13 +35,19 @@ def parser():
     html.add_argument("-o", "--out", type=Path, help="默认同目录 index.html")
     html.add_argument("--title", help="可选页面标题")
     arch = commands.add_parser("arch", help="生成 DSH 盒模型架构 SVG（支持 JSON spec 或预置模板）")
-    arch.add_argument("spec", nargs="?", type=Path, help="可选架构 spec JSON 文件；缺省生成 Hono 模板")
+    arch.add_argument("spec", nargs="?", type=Path, help="兼容位置参数：JSON 文件路径或 hubradar/hono 样例标签")
+    source = arch.add_mutually_exclusive_group()
+    source.add_argument("--spec", dest="spec_path", type=Path, help="架构 spec JSON 文件；路径不存在时返回 2")
+    source.add_argument("--example", choices=("hubradar", "hono"), help="生成官方 Benchmark 样例；无输入时默认 hono")
     arch.add_argument("-o", "--out", type=Path, help="输出 SVG 路径，缺省打印到标准输出")
     return root
 
 
 def main(argv=None):
-    args = parser().parse_args(argv)
+    root = parser()
+    args = root.parse_args(argv)
+    if args.command == "arch" and args.spec is not None and (args.spec_path is not None or args.example is not None):
+        root.error("arch 的位置参数不能与 --spec 或 --example 同时使用")
     try:
         if args.command == "prepare":
             from .prepare import main as prepare
@@ -65,23 +71,18 @@ def main(argv=None):
                 from .html_report import render_file
                 render_file(args.out / "radar.md", args.out / "index.html")
         elif args.command == "arch":
-            from .dsh_architecture import (
-                build_hono_architecture_spec,
-                build_hubradar_architecture_spec,
-                generate_dsh_svg,
-            )
-            if args.spec:
-                spec_str = str(args.spec).strip()
-                if spec_str.lower() == "hubradar":
-                    spec_data = build_hubradar_architecture_spec()
-                elif spec_str.lower() == "hono":
-                    spec_data = build_hono_architecture_spec()
-                elif Path(args.spec).exists():
-                    spec_data = json.loads(Path(args.spec).read_text(encoding="utf-8"))
-                else:
-                    spec_data = build_hubradar_architecture_spec()
+            from .dsh_architecture import generate_dsh_svg, get_example_spec
+
+            legacy_example = str(args.spec).lower() if args.spec is not None else None
+            spec_path = args.spec_path if args.spec_path is not None else args.spec
+            if args.spec_path is None and legacy_example in ("hubradar", "hono"):
+                spec_data = get_example_spec(legacy_example)
+            elif spec_path is not None:
+                if not spec_path.is_file():
+                    raise ValueError(f"架构 spec 文件不存在或不是文件: {spec_path}")
+                spec_data = json.loads(spec_path.read_text(encoding="utf-8"))
             else:
-                spec_data = build_hono_architecture_spec()
+                spec_data = get_example_spec(args.example or "hono")
             svg_content = generate_dsh_svg(spec_data)
             if args.out:
                 args.out.parent.mkdir(parents=True, exist_ok=True)

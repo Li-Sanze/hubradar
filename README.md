@@ -41,9 +41,29 @@ hubradar radar my-domain.json -o out/radar --html             # 领域雷达：�
 hubradar prepare ~/src/hono --repo honojs/hono -o work/hono   # 蒸馏第 1 步：从 Git HEAD 挑出约 2 万 token 的核心证据包
 #   …… Agent 阅读 evidence.md，写出 raw_distill.json ……
 hubradar finalize work/hono --source ~/src/hono -o out/hono --html   # 蒸馏第 2 步：逐条核验锚点，生成卡片与 DSH 白皮书
-hubradar arch -o out/arch.svg                                 # 架构出图：生成 DSH 盒模型矢量全景图（纯 Python，零 Node 依赖）
+hubradar arch --example hubradar -o out/arch.svg              # 官方 Benchmark 样例（也可选 hono；无参数时默认 hono）
+hubradar arch --spec architecture.json -o out/system.svg     # 语义 JSON 自动布局；文件缺失或输入无效时退出码为 2
 hubradar html out/hono/card.md                                 # 格式转换：任意 card.md / radar.md 转换为独立离线单文件 HTML
 ```
+
+DSH 仅使用 Python 标准库；调用方提供 `layers`、`cards`、`edges`，无需坐标。画布宽 1000px，高度随内容增长，四张卡片自动排成 2×2。已有显式坐标与 `connectors` 仍可使用：
+
+```json
+{
+  "title": "系统架构全景",
+  "layers": [
+    {"id": "ingress", "name": "接入平面", "cards": [
+      {"id": "cli", "title": "统一 CLI 网关", "desc": "命令分流", "code_pill": "main(sys.argv)", "color": "blue", "href": "https://github.com/owner/repo/blob/SHA/cli.py#L1"}
+    ]},
+    {"id": "kernel", "name": "执行平面", "cards": [
+      {"id": "prepare", "title": "证据准备", "desc": "静态分析", "color": "emerald"}
+    ]}
+  ],
+  "edges": [{"from": "cli", "to": "prepare", "style": "dashed", "color": "#94a3b8"}]
+}
+```
+
+在 Markdown 的 `dsh`、`architecture` 或 `dsh-architecture` 围栏中放入该 JSON 即可生成报告图解；`hubradar` / `hono` 标签仅加载明确标注的 Benchmark。无效 JSON、渲染异常和原始 SVG 会显示告警卡片及可展开原文，不会替换成其他项目的图。
 
 ```mermaid
 flowchart LR

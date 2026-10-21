@@ -198,7 +198,10 @@
       const dark = document.documentElement.dataset.theme === "dark";
       if (diagramCards.length && window.mermaid) window.mermaid.initialize(diagramConfig(dark));
       for (const card of diagramCards) {
-        if (card.classList.contains("dsh-architecture")) continue;
+        if (card.classList.contains("dsh-architecture")) {
+          fitDiagram(card);
+          continue;
+        }
         if (generation !== renderGeneration) return;
         const target = card.querySelector(".mermaid-target"), status = card.querySelector(".diagram-status");
         target.setAttribute("aria-busy", "true");

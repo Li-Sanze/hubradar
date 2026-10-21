@@ -10,11 +10,7 @@ from uuid import uuid4
 import bleach
 from markdown_it import MarkdownIt
 
-from .dsh_architecture import (
-    build_hono_architecture_spec,
-    build_hubradar_architecture_spec,
-    generate_dsh_svg,
-)
+from .dsh_architecture import generate_dsh_svg, get_example_spec
 
 
 def render_markdown(markdown, *, title=None):
@@ -49,25 +45,14 @@ def render_markdown(markdown, *, title=None):
         if lang in ("dsh", "architecture", "dsh-architecture"):
             key = f"HUBRADARDSH{uuid4().hex}"
             content = token.content.strip()
-            if content.startswith("<svg"):
-                svg_markup = content
-            elif content.startswith("{"):
-                try:
-                    svg_markup = generate_dsh_svg(json.loads(content))
-                except Exception:
-                    svg_markup = generate_dsh_svg(build_hubradar_architecture_spec())
-            else:
-                tag = content.strip().lower()
-                if tag == "hubradar":
-                    svg_markup = generate_dsh_svg(build_hubradar_architecture_spec())
-                else:
-                    svg_markup = generate_dsh_svg(build_hono_architecture_spec())
-
-            diagrams[key] = {
-                "is_mermaid": False,
-                "html": (
+            tag = content.lower()
+            try:
+                spec = get_example_spec(tag) if tag in ("hubradar", "hono") else json.loads(content)
+                svg_markup = generate_dsh_svg(spec)
+                label = f"DSH Benchmark 样例 · {tag}" if tag in ("hubradar", "hono") else "DSH 盒模型 · 架构全景 (可点击代码锚点)"
+                markup = (
                     '<div class="diagram-card dsh-architecture" data-diagram-status="ready">'
-                    '<div class="diagram-bar"><span class="diagram-status" role="status">DSH 盒模型 · 架构全景 (可点击代码锚点)</span>'
+                    f'<div class="diagram-bar"><span class="diagram-status" role="status">{label}</span>'
                     '<div class="diagram-controls">'
                     '<button type="button" data-zoom="-0.2" aria-label="缩小图形">−</button>'
                     '<button type="button" data-zoom="0" aria-label="适应容器">适应</button>'
@@ -76,8 +61,18 @@ def render_markdown(markdown, *, title=None):
                     '<div class="diagram-scroll" tabindex="0" aria-label="可缩放的 DSH 架构全景图">'
                     f'<div class="dsh-svg-target">{svg_markup}</div>'
                     '</div></div>'
-                ),
-            }
+                )
+            except Exception as exc:
+                # A failed diagram must remain a visible failure, with its own
+                # source. Never substitute a diagram about a different system.
+                markup = (
+                    '<div class="diagram-card dsh-architecture" data-diagram-status="error">'
+                    '<div class="diagram-bar"><span class="diagram-status" role="status">⚠ DSH 图形未生成，已保留源码</span></div>'
+                    f'<div class="diagram-scroll"><p class="diagram-error" role="alert">DSH：{html.escape(str(exc)[:300])}</p></div>'
+                    '<details class="diagram-source" open><summary>查看 DSH 原文</summary>'
+                    f'<pre><code>{html.escape(token.content)}</code></pre></details></div>'
+                )
+            diagrams[key] = {"is_mermaid": False, "html": markup}
             return f"<p>{key}</p>"
 
         # Mermaid handling
