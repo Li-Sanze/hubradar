@@ -18,7 +18,7 @@ def build_hubradar_architecture_spec() -> Dict[str, Any]:
         "layers": [
             {
                 "id": "presentation",
-                "name": "使用入口与调度平面 (Presentation & CLI / Agent Skill Plane)",
+                "name": "使用入口与调度平面",
                 "cards": [
                     {
                         "id": "cli",
@@ -38,7 +38,7 @@ def build_hubradar_architecture_spec() -> Dict[str, Any]:
             },
             {
                 "id": "analysis",
-                "name": "双轮分析与验证内核 (Analysis & Invariant Verification Kernel)",
+                "name": "双轮分析与验证内核",
                 "cards": [
                     {
                         "badge": "1",
@@ -58,13 +58,13 @@ def build_hubradar_architecture_spec() -> Dict[str, Any]:
                         "code_pill": "main(domain_file, out_dir)",
                         "pill_desc": "多源开源信号探测 · 极速生成",
                         "color": "purple",
-                        "href": link("hubradar/radar.py", 70, 115),
+                        "href": link("hubradar/radar.py", 70, 169),
                     },
                 ],
             },
             {
                 "id": "output",
-                "name": "矢量渲染与离线打包底座 (Vector Rendering & Offline Packaging)",
+                "name": "矢量渲染与离线打包底座",
                 "cards": [
                     {
                         "id": "svg",

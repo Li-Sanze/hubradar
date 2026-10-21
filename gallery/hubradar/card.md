@@ -15,7 +15,7 @@
   "layers": [
     {
       "id": "presentation",
-      "name": "使用入口与调度平面 (Presentation & CLI / Agent Skill Plane)",
+      "name": "使用入口与调度平面",
       "cards": [
         {
           "id": "cli",
@@ -35,7 +35,7 @@
     },
     {
       "id": "analysis",
-      "name": "双轮分析与验证内核 (Analysis & Invariant Verification Kernel)",
+      "name": "双轮分析与验证内核",
       "cards": [
         {
           "badge": "1",
@@ -55,13 +55,13 @@
           "code_pill": "main(domain_file, out_dir)",
           "pill_desc": "多源开源信号探测 · 极速生成",
           "color": "purple",
-          "href": "https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/radar.py#L70-L115"
+          "href": "https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/radar.py#L70-L169"
         }
       ]
     },
     {
       "id": "output",
-      "name": "矢量渲染与离线打包底座 (Vector Rendering & Offline Packaging)",
+      "name": "矢量渲染与离线打包底座",
       "cards": [
         {
           "id": "svg",
@@ -166,5 +166,5 @@ flowchart LR
 |---|---|---|
 | prepare (事实抽取) | 从 Git HEAD 抽取 AST 符号、调用图、依赖关系与 40 位 SHA 证据包 | [源码事实✓ prepare.py#L166](https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/prepare.py#L166-L248) |
 | finalize (校验收口) | 严格复核 LLM 提取的 claims 引文区间，验证通过后产出白皮书卡片 | [源码事实✓ finalize.py#L150](https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/finalize.py#L150-L170) |
-| radar (领域探测) | 追踪领域突破性黑马项目，自动补全 GitHub 信号与四象限矩阵 | [源码事实✓ radar.py#L15](https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/radar.py#L15-L60) |
+| radar (领域探测) | 追踪领域突破性黑马项目，自动补全 GitHub 信号与六类开源梯队分层 | [源码事实✓ radar.py#L70](https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/radar.py#L70-L169) |
 | dsh_architecture (出图编译器) | 原生纯 Python 渲染 1000px 分层矢量架构图，支持代码穿透与深浅色 | [源码事实✓ dsh_architecture.py#L78](https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/dsh_architecture.py#L78-L150) |
