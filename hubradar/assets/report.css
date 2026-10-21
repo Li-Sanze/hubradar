@@ -17,4 +17,7 @@
 .mermaid-staging{position:absolute;left:-100000px;top:0;visibility:hidden;pointer-events:none}
 .diagram-source{border:0;border-top:1px solid var(--line);border-radius:0;margin:0;font-size:12px}.diagram-source summary{font-size:12px;color:var(--muted)}
 .diagram-error{color:var(--secondary);font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}
+.diagram-card[data-diagram-status=error]{border-color:#dc2626}
+.diagram-card[data-diagram-status=error] .diagram-status,.diagram-card[data-diagram-status=error] .diagram-error{color:#b91c1c}
+:root[data-theme=dark] .diagram-card[data-diagram-status=error] .diagram-status,:root[data-theme=dark] .diagram-card[data-diagram-status=error] .diagram-error{color:#fca5a5}
 @media print{.diagram-controls{display:none}.mermaid-target svg{max-width:100%!important;width:100%!important}.diagram-card{break-inside:avoid}}

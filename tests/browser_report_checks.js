@@ -11,14 +11,38 @@
   try {
     await window.hubradarDiagramsReady;
     const cards = all(".diagram-card"), options = window.hubradarTestOptions;
-    check("mermaid_loaded", typeof window.mermaid?.render === "function");
+    const mermaidCards = cards.filter(card => card.querySelector(".mermaid-target"));
+    const dshCards = cards.filter(card => card.querySelector(".dsh-svg-target"));
+    check("mermaid_loaded_when_needed", mermaidCards.length
+      ? typeof window.mermaid?.render === "function" : typeof window.mermaid === "undefined");
+    if (options.kind === "readme") {
+      check("readme_has_no_diagram_runtime", cards.length === 0);
+      const workflow = all("article table").find(table => table.textContent.includes("Agent 提炼"));
+      check("four_workflow_stages", workflow?.tBodies[0].rows.length === 4);
+      check("workflow_fits_desktop", innerWidth < 640 || workflow.scrollWidth <= workflow.parentElement.clientWidth + 1);
+    }
     if (options.kind === "invalid") {
       check("syntax_failure_visible", cards.some(card => card.dataset.diagramStatus === "error"
         && card.querySelector(".diagram-source").open && card.querySelector(".diagram-error").textContent.length));
     } else {
       check("all_diagrams_ready", cards.every(card => card.dataset.diagramStatus === "ready"));
     }
-    if (options.kind === "hono") check("three_diagrams", cards.length === 3);
+    if (options.kind === "hono") check("dsh_and_three_mermaid_diagrams", dshCards.length === 1 && mermaidCards.length === 3);
+    if (options.kind === "hubradar") check("dsh_and_mermaid_diagrams", dshCards.length === 1 && mermaidCards.length === 1);
+    for (const card of dshCards) {
+      check("dsh_source_anchors", all("a.card-anchor", card).length === (options.kind === "hono" ? 8 : 6));
+      check("dsh_full_card_titles", all("g[data-card-id]", card).every(group => {
+        const title = group.querySelector(":scope > title")?.textContent || "";
+        const labels = [".card-title", ".card-desc", ".code-pill"]
+          .map(selector => group.querySelector(selector)).filter(Boolean);
+        return title.length > 0 && group.firstElementChild.localName === "title"
+          && labels.every(text => title.includes(text.textContent.replace(/…$/, "")));
+      }));
+      if (options.kind === "hubradar") check("digraph_token_complete",
+        card.querySelector('[data-card-id="distill"] .code-pill').textContent.includes("finalize()"));
+      check("dsh_text_inside_cards", all("g[data-card-id]", card).every(group =>
+        all("text", group).every(text => inBounds(rect(text), rect(group.querySelector(".card-rect"))))));
+    }
     if (options.kind === "extended") check("extended_diagrams", cards.length === 3 && cards.every(card => card.querySelector("svg")));
     const measure = theme => {
       const values = cards.filter(card => card.dataset.diagramStatus === "ready").map(card => {
@@ -68,26 +92,28 @@
     await window.hubradarDiagramsReady;
     check("theme_light", document.documentElement.dataset.theme === "light");
     if (options.kind === "hono") {
+      const flow = mermaidCards[0];
       const compact = element => element.textContent.replace(/\s/g, "");
       check("state_self_loop_labels_complete",
-        compact(cards[1].querySelector("svg")).includes("add()→抛错")
-        && compact(cards[2].querySelector("svg")).includes("header()→克隆Response再改"));
-      check("flow_not_overwide", Number(cards[0].querySelector("svg").dataset.width) < 1200);
-      const originalSource = cards[0].querySelector(".diagram-source code").textContent;
-      const select = cards[0].querySelector(".diagram-layout");
+        compact(mermaidCards[1].querySelector("svg")).includes("add()→抛错")
+        && compact(mermaidCards[2].querySelector("svg")).includes("header()→克隆Response再改"));
+      check("flow_not_overwide", Number(flow.querySelector("svg").dataset.width) < 1200);
+      const originalSource = flow.querySelector(".diagram-source code").textContent;
+      const select = flow.querySelector(".diagram-layout");
       select.value = "original"; select.dispatchEvent(new Event("change"));
       await window.hubradarDiagramsReady;
-      check("original_direction_available", cards[0].dataset.layout === "original");
+      check("original_direction_available", flow.dataset.layout === "original");
       select.value = "auto"; select.dispatchEvent(new Event("change"));
       await window.hubradarDiagramsReady;
-      check("source_unchanged", cards[0].querySelector(".diagram-source code").textContent === originalSource);
+      check("source_unchanged", flow.querySelector(".diagram-source code").textContent === originalSource);
     }
-    const svg = document.querySelector(".mermaid-target svg");
+    const svg = document.querySelector(".mermaid-target svg, .dsh-svg-target svg");
     if (svg) {
+      const card = svg.closest(".diagram-card");
       const oldWidth = rect(svg).width;
-      document.querySelector('[data-zoom="0.2"]').click();
+      card.querySelector('[data-zoom="0.2"]').click();
       check("zoom", rect(svg).width > oldWidth);
-      document.querySelector('[data-zoom="0"]').click();
+      card.querySelector('[data-zoom="0"]').click();
       check("fit", rect(svg).width <= svg.closest(".diagram-scroll").clientWidth);
     }
     const details = all("article details");
@@ -121,7 +147,8 @@
       await window.hubradarDiagramsReady;
     }
     document.documentElement.style.scrollBehavior = "auto";
-    const focus = options.capture === "states" ? document.getElementById("section-3")
+    const focus = options.capture === "workflow" ? all("h3").find(heading => heading.textContent === "四阶段工作流")
+      : options.capture === "states" ? document.getElementById("section-3")
       : options.capture === "flow" ? document.getElementById("section-2") : null;
     if (focus) window.scrollTo({ top: focus.getBoundingClientRect().top + window.scrollY - 12, behavior: "instant" });
     await new Promise(resolve => setTimeout(resolve, 200));

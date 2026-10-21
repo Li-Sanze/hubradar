@@ -17,7 +17,151 @@
 
 ## 主数据流与系统全景
 ```dsh-architecture
-hono
+{
+  "slug": "hono",
+  "title": "Hono 核心系统架构与全景分层 (5ca49b07)",
+  "subtitle": "Web 标准接入 · SmartRouter 预编译路由决策 · 单处理器特化与洋葱中间件",
+  "layers": [
+    {
+      "id": "adapters",
+      "name": "多平台运行时接入平面 (Presentation & Adapters)",
+      "cards": [
+        {
+          "id": "web",
+          "title": "原生 Web 标准边缘运行时",
+          "desc": "Workers / Deno / Bun 原生标准 Request",
+          "color": "blue",
+          "href": "https://github.com/honojs/hono/blob/5ca49b0720755c585c9a9835f0a479ceea36fb52/src/hono.ts#L20-L32"
+        },
+        {
+          "id": "adapters",
+          "title": "Node.js / Lambda 适配层",
+          "desc": "非标准平台 Stream 与 Request 双向转换",
+          "color": "yellow",
+          "href": "https://github.com/honojs/hono/blob/5ca49b0720755c585c9a9835f0a479ceea36fb52/src/adapter/aws-lambda/handler.ts#L1-L25"
+        },
+        {
+          "id": "rpc",
+          "title": "RPC 强类型客户端与推导",
+          "desc": "hc 客户端与 AppType 强类型声明",
+          "color": "purple",
+          "href": "https://github.com/honojs/hono/blob/5ca49b0720755c585c9a9835f0a479ceea36fb52/src/client/index.ts#L1-L17"
+        }
+      ]
+    },
+    {
+      "id": "kernel",
+      "name": "核心应用底座与路由决策引擎 (Application Kernel & Router)",
+      "cards": [
+        {
+          "badge": "1",
+          "id": "dispatch",
+          "title": "HonoBase #dispatch 调度",
+          "desc": "getPath 解析路径，构造 HonoRequest",
+          "code_pill": "this.router.match(method, path)",
+          "color": "blue",
+          "href": "https://github.com/honojs/hono/blob/5ca49b0720755c585c9a9835f0a479ceea36fb52/src/hono-base.ts#L437-L448"
+        },
+        {
+          "badge": "2",
+          "id": "router",
+          "title": "SmartRouter 组合路由",
+          "desc": "RegExpRouter(预编译) + TrieRouter(回退)",
+          "code_pill": "this.match = router.match.bind(router)",
+          "color": "purple",
+          "href": "https://github.com/honojs/hono/blob/5ca49b0720755c585c9a9835f0a479ceea36fb52/src/router/smart-router/router.ts#L21-L49"
+        },
+        {
+          "badge": "3",
+          "id": "context",
+          "title": "Context 惰性上下文容器",
+          "desc": "??= 按需初始化 headers、变量 Map、body",
+          "code_pill": "this.#req ??= new HonoRequest(...)",
+          "color": "emerald",
+          "href": "https://github.com/honojs/hono/blob/5ca49b0720755c585c9a9835f0a479ceea36fb52/src/context.ts#L366-L407"
+        }
+      ]
+    },
+    {
+      "id": "execution",
+      "name": "执行管道特化：快路径 VS compose",
+      "cards": [
+        {
+          "id": "fast-path",
+          "title": "单处理器快路径特化 (Fast Path)",
+          "desc": "当 matchResult[0].length === 1 时完全绕过 compose",
+          "code_pill": "res = matchResult[0][0][0][0](c, async () => {})",
+          "pill_desc": "零中间件级联调度开销 · 直接返回 Response 对象",
+          "color": "emerald",
+          "href": "https://github.com/honojs/hono/blob/5ca49b0720755c585c9a9835f0a479ceea36fb52/src/hono-base.ts#L449-L466"
+        },
+        {
+          "id": "compose",
+          "title": "洋葱式中间件级联调度 (compose)",
+          "desc": "compose(matchResult[0]) 串联执行与错误捕获",
+          "code_pill": "res = await handler(context, () => dispatch(i + 1))",
+          "pill_desc": "严格维护 context.finalized 状态机 · 错误冒泡守卫",
+          "color": "purple",
+          "href": "https://github.com/honojs/hono/blob/5ca49b0720755c585c9a9835f0a479ceea36fb52/src/compose.ts#L32-L71"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "web",
+      "to": "dispatch",
+      "style": "dashed"
+    },
+    {
+      "from": "adapters",
+      "to": "dispatch",
+      "style": "dashed"
+    },
+    {
+      "from": "rpc",
+      "to": "dispatch",
+      "style": "dashed"
+    },
+    {
+      "from": "dispatch",
+      "to": "router"
+    },
+    {
+      "from": "router",
+      "to": "context"
+    },
+    {
+      "from": "context",
+      "to": "fast-path"
+    },
+    {
+      "from": "context",
+      "to": "compose"
+    }
+  ],
+  "legend": {
+    "items": [
+      {
+        "label": "Web 接入层 (Presentation)",
+        "color": "#2563eb"
+      },
+      {
+        "label": "调度与路由 (Kernel & Router)",
+        "color": "#7c3aed"
+      },
+      {
+        "label": "执行管道特化 (Execution)",
+        "color": "#059669"
+      },
+      {
+        "label": "点击直达 GitHub 源码提交行",
+        "color": "#64748b"
+      }
+    ]
+  },
+  "summary_note": "统一输出 Web 标准 Response (HTTP 200/404/500) · 节点点击直达 GitHub 5ca49b07 提交行"
+}
 ```
 <details><summary>查看 Mermaid 原始流程图</summary>
 
