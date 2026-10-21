@@ -56,6 +56,22 @@ def escape(s: Any) -> str:
     return html.escape(str(s) if s is not None else "")
 
 
+def fit_text(text: Any, max_px: int) -> str:
+    """Ensure text fits visually inside pixel budget; truncate with ellipsis if needed."""
+    if not text:
+        return ""
+    text_str = str(text).strip()
+    w = 0.0
+    res = []
+    for ch in text_str:
+        ch_w = 11.5 if ord(ch) > 127 else 6.8
+        if w + ch_w > max_px:
+            return "".join(res).rstrip() + "…"
+        w += ch_w
+        res.append(ch)
+    return text_str
+
+
 def validate_href(href: Optional[str]) -> Optional[str]:
     """Ensure links are safe http/https URLs."""
     if not href:
@@ -200,27 +216,31 @@ def generate_dsh_svg(spec: Dict[str, Any]) -> str:
             # Card title and description
             title_y = 26 if badge else 23
             desc_y = 48 if badge else 42
+            safe_title = fit_text(c_title, cw - tx_offset - 14)
+            safe_desc = fit_text(c_desc, cw - 28)
             card_group.append(
-                f'      <text x="{tx_offset}" y="{title_y}" class="card-title" fill="{palette["title_fill"]}">{escape(c_title)}</text>'
+                f'      <text x="{tx_offset}" y="{title_y}" class="card-title" fill="{palette["title_fill"]}">{escape(safe_title)}</text>'
             )
             card_group.append(
-                f'      <text x="14" y="{desc_y}" class="card-desc">{escape(c_desc)}</text>'
+                f'      <text x="14" y="{desc_y}" class="card-desc">{escape(safe_desc)}</text>'
             )
 
             # Code pill inside card - positioned relative to content or bottom
             if code_pill:
                 pill_y = int(card.get("pill_y", ch - 44))
                 pill_h = int(card.get("pill_h", 32))
+                safe_pill = fit_text(code_pill, cw - 36)
                 card_group.append(
                     f'      <rect x="12" y="{pill_y}" width="{cw - 24}" height="{pill_h}" rx="4" '
                     f'fill="{palette["pill_bg"]}" stroke="{palette["stroke"]}" stroke-width="0.8"/>'
                 )
                 card_group.append(
-                    f'      <text x="20" y="{pill_y + 19}" class="code-pill">{escape(code_pill)}</text>'
+                    f'      <text x="20" y="{pill_y + 19}" class="code-pill">{escape(safe_pill)}</text>'
                 )
                 if pill_desc:
+                    safe_pdesc = fit_text(pill_desc, cw - 36)
                     card_group.append(
-                        f'      <text x="20" y="{pill_y + pill_h + 16}" class="card-desc" fill="{palette["title_fill"]}">{escape(pill_desc)}</text>'
+                        f'      <text x="20" y="{pill_y + pill_h + 16}" class="card-desc" fill="{palette["title_fill"]}">{escape(safe_pdesc)}</text>'
                     )
 
             card_group.append("    </g>")
@@ -312,7 +332,7 @@ def build_hubradar_architecture_spec() -> Dict[str, Any]:
                 "cards": [
                     {
                         "title": "统一 CLI 懒加载网关 (cli.py)",
-                        "desc": "lazy-import 分流 prepare / finalize / radar / arch / html",
+                        "desc": "lazy-import 分流五大子命令与流水线",
                         "x": 60,
                         "y": 115,
                         "width": 270,
@@ -322,7 +342,7 @@ def build_hubradar_architecture_spec() -> Dict[str, Any]:
                     },
                     {
                         "title": "宿主双 Agent Skill 协议 (skills/)",
-                        "desc": "3 分钟卡片与领域技术雷达 双规范交互契约",
+                        "desc": "3 分钟卡片与技术雷达 双规范交互契约",
                         "x": 365,
                         "y": 115,
                         "width": 270,
@@ -332,7 +352,7 @@ def build_hubradar_architecture_spec() -> Dict[str, Any]:
                     },
                     {
                         "title": "交互缩放与深浅色控制器 (assets/)",
-                        "desc": "CSS 变量双模自适应 · 零依赖矢量图无级缩放与自适应",
+                        "desc": "CSS 变量双模自适应 · 零依赖无级缩放",
                         "x": 670,
                         "y": 115,
                         "width": 270,
@@ -394,7 +414,7 @@ def build_hubradar_architecture_spec() -> Dict[str, Any]:
                 ],
             },
             {
-                "name": "矢量渲染与白皮书打包底座 (Vector Rendering & Offline Packaging Base)",
+                "name": "矢量渲染与离线打包底座",
                 "x": 40,
                 "y": 425,
                 "width": 920,
@@ -432,16 +452,16 @@ def build_hubradar_architecture_spec() -> Dict[str, Any]:
             },
         ],
         "connectors": [
-            # Layer 1 -> Layer 2 dashed downward lines (clean clearance: y1=178, y2=208)
-            {"type": "line", "x1": 195, "y1": 178, "x2": 195, "y2": 208, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
-            {"type": "line", "x1": 500, "y1": 178, "x2": 500, "y2": 208, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
-            {"type": "line", "x1": 805, "y1": 178, "x2": 805, "y2": 208, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
-            # Layer 2 horizontal workflow (clean clearance: x1=334, x2=358; x1=639, x2=663)
-            {"type": "line", "x1": 334, "y1": 305, "x2": 358, "y2": 305, "color": "#2563eb", "width": 2, "marker": "url(#arrow-blue)"},
-            {"type": "line", "x1": 639, "y1": 305, "x2": 663, "y2": 305, "color": "#2563eb", "width": 2, "marker": "url(#arrow-blue)"},
-            # Layer 2 -> Layer 3 branching lines (clean clearance: stops at y=418 above Layer 3 container)
-            {"type": "polyline", "points": [[500, 360], [500, 395], [270, 395], [270, 418]], "color": "#94a3b8", "width": 1.5, "marker": "url(#arrow-gray)"},
-            {"type": "polyline", "points": [[500, 395], [725, 395], [725, 418]], "color": "#94a3b8", "width": 1.5, "marker": "url(#arrow-gray)"},
+            # Layer 1 -> Layer 2 dashed downward lines (touch container top at y=214)
+            {"type": "line", "x1": 195, "y1": 175, "x2": 195, "y2": 214, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
+            {"type": "line", "x1": 500, "y1": 175, "x2": 500, "y2": 214, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
+            {"type": "line", "x1": 805, "y1": 175, "x2": 805, "y2": 214, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
+            # Layer 2 horizontal workflow (full-span connection: x1=330 to x2=364; x1=635 to x2=669)
+            {"type": "line", "x1": 330, "y1": 305, "x2": 364, "y2": 305, "color": "#2563eb", "width": 2, "marker": "url(#arrow-blue)"},
+            {"type": "line", "x1": 635, "y1": 305, "x2": 669, "y2": 305, "color": "#2563eb", "width": 2, "marker": "url(#arrow-blue)"},
+            # Layer 2 -> Layer 3 branching lines (direct feed into Layer 3 cards at y=458, clear of title)
+            {"type": "polyline", "points": [[500, 360], [500, 405], [270, 405], [270, 458]], "color": "#94a3b8", "width": 1.5, "marker": "url(#arrow-gray)"},
+            {"type": "polyline", "points": [[500, 405], [725, 405], [725, 458]], "color": "#94a3b8", "width": 1.5, "marker": "url(#arrow-gray)"},
         ],
         "legend": {
             "x": 60,
@@ -568,7 +588,7 @@ def build_hono_architecture_spec() -> Dict[str, Any]:
                 ],
             },
             {
-                "name": "请求执行管道分化：单处理器快路径 VS 洋葱中间件",
+                "name": "执行管道特化：快路径 VS compose",
                 "x": 40,
                 "y": 425,
                 "width": 920,
@@ -606,16 +626,16 @@ def build_hono_architecture_spec() -> Dict[str, Any]:
             },
         ],
         "connectors": [
-            # Layer 1 -> Layer 2 dashed downward lines (clean clearance: y1=178, y2=208)
-            {"type": "line", "x1": 195, "y1": 178, "x2": 195, "y2": 208, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
-            {"type": "line", "x1": 500, "y1": 178, "x2": 500, "y2": 208, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
-            {"type": "line", "x1": 805, "y1": 178, "x2": 805, "y2": 208, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
-            # Layer 2 horizontal workflow (clean clearance: x1=334, x2=358; x1=639, x2=663)
-            {"type": "line", "x1": 334, "y1": 305, "x2": 358, "y2": 305, "color": "#2563eb", "width": 2, "marker": "url(#arrow-blue)"},
-            {"type": "line", "x1": 639, "y1": 305, "x2": 663, "y2": 305, "color": "#2563eb", "width": 2, "marker": "url(#arrow-blue)"},
-            # Layer 2 Context -> Layer 3 pipeline fork (clean clearance: stops at y=418 above Layer 3 container)
-            {"type": "polyline", "points": [[805, 360], [805, 395], [270, 395], [270, 418]], "color": "#94a3b8", "width": 1.5, "marker": "url(#arrow-gray)"},
-            {"type": "polyline", "points": [[805, 395], [725, 395], [725, 418]], "color": "#94a3b8", "width": 1.5, "marker": "url(#arrow-gray)"},
+            # Layer 1 -> Layer 2 dashed downward lines (touch container top at y=214)
+            {"type": "line", "x1": 195, "y1": 175, "x2": 195, "y2": 214, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
+            {"type": "line", "x1": 500, "y1": 175, "x2": 500, "y2": 214, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
+            {"type": "line", "x1": 805, "y1": 175, "x2": 805, "y2": 214, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
+            # Layer 2 horizontal workflow (full-span connection: x1=330 to x2=364; x1=635 to x2=669)
+            {"type": "line", "x1": 330, "y1": 305, "x2": 364, "y2": 305, "color": "#2563eb", "width": 2, "marker": "url(#arrow-blue)"},
+            {"type": "line", "x1": 635, "y1": 305, "x2": 669, "y2": 305, "color": "#2563eb", "width": 2, "marker": "url(#arrow-blue)"},
+            # Layer 2 Context -> Layer 3 pipeline fork (direct feed into Layer 3 cards at y=458)
+            {"type": "polyline", "points": [[805, 360], [805, 405], [270, 405], [270, 458]], "color": "#94a3b8", "width": 1.5, "marker": "url(#arrow-gray)"},
+            {"type": "polyline", "points": [[805, 405], [725, 405], [725, 458]], "color": "#94a3b8", "width": 1.5, "marker": "url(#arrow-gray)"},
         ],
         "legend": {
             "x": 60,
