@@ -1,0 +1,8 @@
+recursive-include skills *.md
+recursive-include domains *.json
+recursive-include gallery *.md *.json *.html *.svg *.png
+recursive-include docs *.png *.svg *.md
+recursive-include tests *.py
+recursive-include tests *.js
+recursive-include tests *.md
+recursive-include hubradar/assets/vendor *.js *.txt *.json *.md

@@ -1,0 +1,17 @@
+{
+ "claims_total": 32,
+ "claims_passed": 32,
+ "by_type": {
+  "社区信号": 3,
+  "批判审计": 1,
+  "源码事实": 21,
+  "报告综合": 3,
+  "作者声明": 4
+ },
+ "errors": [],
+ "timings": {
+  "prepare_s": 9.89,
+  "host_s": 77,
+  "finalize_s": 1.14
+ }
+}

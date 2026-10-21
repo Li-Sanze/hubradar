@@ -1,0 +1,45 @@
+{
+ "id": "code-intel-for-agents",
+ "name": "给 AI/Agent 用的代码理解工具",
+ "seeds": [
+  "yamadashy/repomix",
+  "coderamp-labs/gitingest",
+  "AsyncFuncAI/deepwiki-open",
+  "Aider-AI/aider",
+  "DeusData/codebase-memory-mcp",
+  "Graphify-Labs/graphify",
+  "ahmedkhaleel2004/gitdiagram",
+  "yzddmr6/repo-analyzer",
+  "pingcap/ossinsight",
+  "sopaco/deepwiki-rs",
+  "vitali87/code-graph-rag",
+  "giancarloerra/SocratiCode",
+  "Ofori01/show-me",
+  "sunhuaian2026/github-repo-scout",
+  "will702/find-repo"
+ ],
+ "queries": [
+  "topic:code-intelligence stars:>100 pushed:>2026-04-20",
+  "topic:codebase-analysis stars:>50 pushed:>2026-04-20",
+  "topic:code-graph stars:>50 pushed:>2026-04-20",
+  "codebase knowledge graph in:description stars:>200 pushed:>2026-04-20",
+  "codebase llm context in:description stars:>200 pushed:>2026-04-20",
+  "deepwiki in:name,description stars:>100",
+  "repository map llm in:description stars:>100",
+  "codebase in:description created:>2026-07-20 stars:>200",
+  "agent skill codebase in:description,topics stars:>20 created:>2026-04-01"
+ ],
+ "ignore_topics": [
+  "ai",
+  "llm",
+  "python",
+  "typescript",
+  "javascript",
+  "rust",
+  "go",
+  "open-source"
+ ],
+ "history_top": 60,
+ "history_cap": 90,
+ "exclude_desc": "official (code|codebase|implementation|pytorch)|\\bpaper\\b|arxiv|motion retargeting"
+}

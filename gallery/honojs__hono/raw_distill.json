@@ -1,0 +1,131 @@
+{
+  "schema_version": "distill.v0",
+  "repo": "honojs/hono",
+  "sha": "5ca49b0720755c585c9a9835f0a479ceea36fb52",
+  "essence": {
+    "text": "Hono = Web 标准 Request/Response + 可替换的路由策略（默认 SmartRouter 组合 RegExpRouter/TrieRouter）+ 洋葱式中间件 compose；单处理器请求走绕过 compose 的快路径。",
+    "claim_ids": ["c16", "c8", "c4", "c5", "c7"]
+  },
+  "solves": "在任意 JS 运行时（Workers/Deno/Bun/Node/Lambda）上用同一套代码写 HTTP API，并获得强类型的路由与 RPC 客户端。",
+  "not_solves": "不提供 Express 中间件兼容层，也不内置 OpenAPI 文档生成（均为高票未关闭需求）。",
+  "abstractions": [
+    {"name": "Hono / HonoBase（应用）", "role": "注册路由与中间件，持有 router，#dispatch 把 Request 变成 Response", "claim_ids": ["c1", "c2", "c3", "c4"]},
+    {"name": "Router<T>（路由策略接口）", "role": "add/match 两个方法；多实现可替换，默认 SmartRouter 组合两种实现", "claim_ids": ["c9", "c8"]},
+    {"name": "Context（请求上下文）", "role": "惰性持有 req/res/变量 Map，提供 c.text/c.json 等响应构造，并维护 finalized 状态", "claim_ids": ["c10", "c11", "c12"]},
+    {"name": "HonoRequest（请求包装）", "role": "按 matchResult 解析路径参数，缓存 body，供校验器写入已验证数据", "claim_ids": ["c13", "c14"]},
+    {"name": "compose（中间件内核）", "role": "把匹配到的处理器链组装成洋葱模型；单处理器时被绕过", "claim_ids": ["c7", "c5"]}
+  ],
+  "dataflow": {
+    "nodes": [
+      {"id": "rt", "label": "运行时事件/Request"},
+      {"id": "ad", "label": "Adapter（平台→Web Request）"},
+      {"id": "dp", "label": "HonoBase #dispatch"},
+      {"id": "gp", "label": "getPath 解析路径"},
+      {"id": "rm", "label": "router.match"},
+      {"id": "cx", "label": "new Context"},
+      {"id": "fp", "label": "单处理器快路径"},
+      {"id": "cp", "label": "compose 洋葱链"},
+      {"id": "rs", "label": "Response"}
+    ],
+    "edges": [
+      {"from": "rt", "to": "ad", "label": "非 Web 标准平台", "claim_ids": ["c23"]},
+      {"from": "ad", "to": "dp", "label": "Request", "claim_ids": ["c23"]},
+      {"from": "dp", "to": "gp", "label": "", "claim_ids": ["c4", "c15"]},
+      {"from": "gp", "to": "rm", "label": "method+path", "claim_ids": ["c4"]},
+      {"from": "rm", "to": "cx", "label": "matchResult", "claim_ids": ["c4"]},
+      {"from": "cx", "to": "fp", "label": "1 个处理器", "claim_ids": ["c5"]},
+      {"from": "cx", "to": "cp", "label": "多个处理器", "claim_ids": ["c25"]},
+      {"from": "fp", "to": "rs", "label": "", "claim_ids": ["c5"]},
+      {"from": "cp", "to": "rs", "label": "c.res", "claim_ids": ["c11"]}
+    ]
+  },
+  "state_machines": [
+    {
+      "name": "Router 生命周期（注册期 → 已构建）",
+      "states": ["注册中", "matcher 已构建"],
+      "transitions": [{"from": "注册中", "to": "matcher 已构建", "on": "首次 match"}, {"from": "matcher 已构建", "to": "matcher 已构建", "on": "add() → 抛错"}],
+      "claim_ids": ["c26"]
+    },
+    {
+      "name": "Context 响应状态",
+      "states": ["未定稿（仅预备 headers）", "已定稿 finalized"],
+      "transitions": [{"from": "未定稿（仅预备 headers）", "to": "已定稿 finalized", "on": "set res / c.text 等"}, {"from": "已定稿 finalized", "to": "已定稿 finalized", "on": "header() → 克隆 Response 再改"}],
+      "claim_ids": ["c11", "c27"]
+    }
+  ],
+  "patterns": [
+    {"name": "洋葱式中间件（compose + await next()）", "why_load_bearing": "所有中间件与子应用错误处理都经由 compose 串联；内置中间件 36 处 await next()", "claim_ids": ["c7", "c28"]},
+    {"name": "策略 + 组合（Router 接口 + SmartRouter）", "why_load_bearing": "性能与兼容性的取舍被封装在可替换的路由实现里", "claim_ids": ["c9", "c8"]},
+    {"name": "惰性初始化（??= / ||=）", "why_load_bearing": "req、res、变量 Map、body 都按需创建，降低每请求分配", "claim_ids": ["c10", "c12", "c13", "c29"]},
+    {"name": "快路径特化", "why_load_bearing": "只有一个处理器时跳过 compose，直接调用", "claim_ids": ["c5"]}
+  ],
+  "tradeoffs": [
+    {"choice": "只依赖 Web 标准 API、零依赖", "gave_up": "Node 等非标准平台需要 adapter 转换", "cost": "adapter 层持续维护（近一年改动最多的文件是 aws-lambda handler）", "claim_ids": ["c16", "c18", "c30"]},
+    {"choice": "RegExpRouter 预编译匹配器追求速度", "gave_up": "构建后不能再注册路由；部分路径模式不支持", "cost": "需要 SmartRouter 用 TrieRouter 兜底", "claim_ids": ["c17", "c26", "c31", "c8"]},
+    {"choice": "重度类型体操换取类型推导与 RPC 客户端", "gave_up": "类型实现复杂度（types.ts 约 2660 行）", "cost": "RPC 在中间件响应、SSE 等场景的类型覆盖长期是高票需求", "claim_ids": ["c24", "c21"]}
+  ],
+  "mvp": {
+    "language": "typescript",
+    "code": "type Next = () => Promise<void>\ntype Handler = (c: Ctx, next: Next) => Response | void | Promise<Response | void>\n\nclass Ctx {\n  res?: Response\n  finalized = false\n  #vars?: Map<string, unknown>\n  constructor(public req: Request, public params: Record<string, string>) {}\n  set(k: string, v: unknown) { (this.#vars ??= new Map()).set(k, v) }\n  get(k: string) { return this.#vars?.get(k) }\n  text(body: string, status = 200) {\n    this.res = new Response(body, { status })\n    this.finalized = true\n    return this.res\n  }\n}\n\nfunction compose(handlers: Handler[]) {\n  return async (c: Ctx) => {\n    let last = -1\n    const run = async (i: number): Promise<void> => {\n      if (i <= last) throw new Error('next() called multiple times')\n      last = i\n      const h = handlers[i]\n      if (!h) return\n      const r = await h(c, () => run(i + 1))\n      if (r instanceof Response) { c.res = r; c.finalized = true }\n    }\n    await run(0)\n    return c\n  }\n}\n\ninterface Router<T> { add(m: string, p: string, h: T): void; match(m: string, p: string): [T, Record<string, string>][] }\n\nclass LinearRouter<T> implements Router<T> {\n  #routes: [string, RegExp, string[], T][] = []\n  add(m: string, p: string, h: T) {\n    const keys: string[] = []\n    const re = new RegExp('^' + p.replace(/\\*/g, '.*').replace(/:(\\w+)/g, (_, k) => (keys.push(k), '([^/]+)')) + '$')\n    this.#routes.push([m, re, keys, h])\n  }\n  match(m: string, p: string) {\n    const out: [T, Record<string, string>][] = []\n    for (const [rm, re, keys, h] of this.#routes) {\n      const hit = (rm === 'ALL' || rm === m) && re.exec(p)\n      if (hit) out.push([h, Object.fromEntries(keys.map((k, i) => [k, hit[i + 1]]))])\n    }\n    return out\n  }\n}\n\nexport class MiniHono {\n  router: Router<Handler> = new LinearRouter<Handler>()\n  get(path: string, ...hs: Handler[]) { hs.forEach((h) => this.router.add('GET', path, h)); return this }\n  use(...hs: Handler[]) { hs.forEach((h) => this.router.add('ALL', '*', h)); return this }\n  fetch = async (req: Request): Promise<Response> => {\n    const path = new URL(req.url).pathname\n    const matched = this.router.match(req.method, path)\n    const c = new Ctx(req, matched.at(-1)?.[1] ?? {})\n    const notFound = () => new Response('404 Not Found', { status: 404 })\n    if (matched.length === 1) {\n      return (await matched[0][0](c, async () => {})) ?? c.res ?? notFound()\n    }\n    await compose(matched.map(([h]) => h))(c)\n    return c.res ?? notFound()\n  }\n}\n",
+    "mappings": [
+      {"lines": "4-16", "claim_ids": ["c10", "c11", "c12"]},
+      {"lines": "18-32", "claim_ids": ["c7", "c25"]},
+      {"lines": "34-53", "claim_ids": ["c9"]},
+      {"lines": "55-71", "claim_ids": ["c1", "c2", "c4", "c5"]}
+    ]
+  },
+  "pitfalls": [
+    {"text": "路由必须在首个请求前注册完：matcher 构建后再 add 会抛错（动态注册路由的项目要注意）。", "claim_ids": ["c26"]},
+    {"text": "不要直接消费 c.req.raw 的 body；用 req.json()/req.text() 等带缓存的方法，否则后续克隆请求会 500。", "claim_ids": ["c32"]},
+    {"text": "响应定稿后再改 header 会克隆整个 Response：中间件里尽量在 next() 之前设置头。", "claim_ids": ["c27"]},
+    {"text": "Express 中间件不能直接复用（兼容层仍是开放需求）；从 v3 起 c.req 是 HonoRequest，升级旧代码先看迁移指南。", "claim_ids": ["c19", "c22"]}
+  ],
+  "steal": [
+    {"text": "单处理器快路径：命中只有一个 handler 时完全绕过中间件引擎。", "claim_ids": ["c5"]},
+    {"text": "用 ??= 惰性创建每请求对象（req 包装、Headers、变量 Map、body 缓存）。", "claim_ids": ["c10", "c12", "c13", "c29"]},
+    {"text": "把路由做成策略接口，再用组合路由在快实现失败时回退到通用实现。", "claim_ids": ["c8", "c9", "c31"]},
+    {"text": "热路径上手写 charCode 扫描解析 URL 路径，避免 new URL() 的开销。", "claim_ids": ["c15"]}
+  ],
+  "verdict": {"decision": "用 + 借鉴", "reason": "做多运行时/边缘 HTTP API 可直接用；造自己的框架或中间件系统时，compose 内核、路由策略与快路径值得照搬。"},
+  "reading_route": [
+    {"path": "src/hono.ts", "why": "33 行看清默认装配：HonoBase + SmartRouter"},
+    {"path": "src/hono-base.ts", "why": "#addRoute 与 #dispatch：请求主路径"},
+    {"path": "src/compose.ts", "why": "洋葱模型内核（证据包只含签名，需回原文）"},
+    {"path": "src/context.ts", "why": "惰性对象与 finalized 语义"},
+    {"path": "src/router/smart-router/router.ts", "why": "路由回退策略（证据包只含类签名，需回原文）"}
+  ],
+  "claims": [
+    {"id": "c1", "type": "源码事实", "text": "构造函数为每个 HTTP 方法生成注册函数，最终调用 #addRoute。", "confidence": "high", "anchors": [{"path": "src/hono-base.ts", "start": 144, "end": 158, "quote": "this.#addRoute(methodName, this.#path, args1)"}]},
+    {"id": "c2", "type": "源码事实", "text": "use() 把中间件注册为 METHOD_NAME_ALL 路由，未给路径时用 '*'.", "confidence": "high", "anchors": [{"path": "src/hono-base.ts", "start": 175, "end": 186, "quote": "this.#addRoute(METHOD_NAME_ALL, this.#path, handler)"}]},
+    {"id": "c3", "type": "源码事实", "text": "#addRoute 把 [handler, routeMeta] 交给 router.add 并记录到 routes。", "confidence": "high", "anchors": [{"path": "src/hono-base.ts", "start": 405, "end": 416, "quote": "this.router.add(method, path, [handler, r])"}]},
+    {"id": "c4", "type": "源码事实", "text": "#dispatch：getPath 取路径 → router.match → 用 matchResult 构造 Context。", "confidence": "high", "anchors": [{"path": "src/hono-base.ts", "start": 437, "end": 446, "quote": "const matchResult = this.router.match(method, path)"}]},
+    {"id": "c5", "type": "源码事实", "text": "只匹配到一个处理器时直接调用它，不经过 compose。", "confidence": "high", "anchors": [{"path": "src/hono-base.ts", "start": 449, "end": 466, "quote": "if (matchResult[0].length === 1) {"}]},
+    {"id": "c6", "type": "源码事实", "text": "HEAD 请求按 GET 分发后丢弃 body。", "confidence": "high", "anchors": [{"path": "src/hono-base.ts", "start": 432, "end": 435, "quote": "new Response(null, await this.#dispatch(request, executionCtx, env, 'GET'))"}]},
+    {"id": "c7", "type": "源码事实", "text": "compose 是中间件内核：route() 挂载子应用时用 compose 包裹子应用的错误处理。", "confidence": "high", "anchors": [{"path": "src/hono-base.ts", "start": 242, "end": 243, "quote": "(await compose([], app.errorHandler)(c, () => r.handler(c, next))).res"}, {"path": "src/compose.ts", "start": 15, "end": 15, "quote": "const compose = <E extends Env = Env>("}]},
+    {"id": "c8", "type": "源码事实", "text": "公开的 Hono 类继承 HonoBase，默认路由为 SmartRouter([RegExpRouter, TrieRouter])。", "confidence": "high", "anchors": [{"path": "src/hono.ts", "start": 20, "end": 32, "quote": "routers: [new RegExpRouter(), new TrieRouter()],"}]},
+    {"id": "c9", "type": "源码事实", "text": "Router 接口只有 name/add/match，match 返回带参数索引的 Result。", "confidence": "high", "anchors": [{"path": "src/router.ts", "start": 29, "end": 52, "quote": "match(method: string, path: string): Result<T>"}]},
+    {"id": "c10", "type": "源码事实", "text": "Context 首次访问 c.req 时才创建 HonoRequest。", "confidence": "high", "anchors": [{"path": "src/context.ts", "start": 366, "end": 369, "quote": "this.#req ??= new HonoRequest(this.#rawRequest, this.#path, this.#matchResult)"}]},
+    {"id": "c11", "type": "源码事实", "text": "给 c.res 赋值会合并已有 headers（含 set-cookie）并把 finalized 置为 true。", "confidence": "high", "anchors": [{"path": "src/context.ts", "start": 414, "end": 434, "quote": "this.finalized = true"}]},
+    {"id": "c12", "type": "源码事实", "text": "c.set/c.get 背后是按需创建的 Map。", "confidence": "high", "anchors": [{"path": "src/context.ts", "start": 557, "end": 560, "quote": "this.#var ??= new Map()"}]},
+    {"id": "c13", "type": "源码事实", "text": "HonoRequest 缓存已读取的 body，多次读取复用同一 Promise。", "confidence": "high", "anchors": [{"path": "src/request.ts", "start": 217, "end": 244, "quote": "return (bodyCache[key] = raw[key]())"}]},
+    {"id": "c14", "type": "源码事实", "text": "路径参数从 matchResult 与 routeIndex 中解析并按需解码。", "confidence": "high", "anchors": [{"path": "src/request.ts", "start": 103, "end": 107, "quote": "const paramKey = this.#matchResult[0][this.routeIndex]?.[1][key]"}]},
+    {"id": "c15", "type": "源码事实", "text": "getPath 直接扫描 URL 字符串的 charCode 截取路径，不构造 URL 对象。", "confidence": "high", "anchors": [{"path": "src/utils/url.ts", "start": 106, "end": 134, "quote": "const start = url.indexOf('/', url.indexOf(':') + 4)"}]},
+    {"id": "c16", "type": "作者声明", "text": "Hono 构建在 Web 标准之上，可运行于任意 JS 运行时。", "confidence": "high", "anchors": [{"path": "README.md", "start": 21, "end": 21, "quote": "is a small, simple, and ultrafast web framework built on Web Standards"}]},
+    {"id": "c17", "type": "作者声明", "text": "作者称 RegExpRouter 很快、不使用线性循环。", "confidence": "high", "anchors": [{"path": "README.md", "start": 42, "end": 42, "quote": "The router `RegExpRouter` is really fast. Not using linear loops."}]},
+    {"id": "c18", "type": "作者声明", "text": "零依赖，只用 Web 标准 API。", "confidence": "high", "anchors": [{"path": "README.md", "start": 43, "end": 43, "quote": "Hono has zero dependencies and uses only the Web Standard API."}]},
+    {"id": "c19", "type": "社区信号", "text": "Express 兼容中间件是开放的高票需求（+34）。", "confidence": "high", "links": ["https://github.com/honojs/hono/issues/3293"], "anchors": []},
+    {"id": "c20", "type": "社区信号", "text": "自动生成 OpenAPI/Swagger 文档仍是开放的高票需求（+36）。", "confidence": "high", "links": ["https://github.com/honojs/hono/issues/2970"], "anchors": []},
+    {"id": "c21", "type": "社区信号", "text": "RPC 对中间件响应（已关闭）和 SSE（开放）的类型支持是长期高票需求。", "confidence": "medium", "links": ["https://github.com/honojs/hono/issues/2719", "https://github.com/honojs/hono/issues/3309"], "anchors": []},
+    {"id": "c22", "type": "作者声明", "text": "迁移指南记录：v3 起 c.req 改为 HonoRequest，Validator 变更。", "confidence": "high", "anchors": [{"path": "docs/MIGRATION.md", "start": 64, "end": 64, "quote": "### `c.req` is now `HonoRequest`"}, {"path": "docs/MIGRATION.md", "start": 80, "end": 80, "quote": "### Validator has been changed"}]},
+    {"id": "c23", "type": "报告综合", "text": "adapter 只负责把平台事件转换为 Web 标准 Request/Response，核心只认 Request。", "confidence": "medium", "anchors": [{"path": "src/hono-base.ts", "start": 425, "end": 430, "quote": "request: Request,"}]},
+    {"id": "c24", "type": "批判审计", "text": "类型层是最大的复杂度来源：types.ts 约 2660 行、被 54 个文件引用，类型报错与编译成本是隐性代价。", "confidence": "medium", "anchors": [{"path": "src/types.ts", "start": 35, "end": 35, "quote": "type Next = () => Promise<void>"}]},
+    {"id": "c25", "type": "报告综合", "text": "多个处理器时由 compose 组装成洋葱链执行（快路径之后的分支，证据包中被截断）。", "confidence": "medium", "anchors": [{"path": "src/hono-base.ts", "start": 7, "end": 7, "quote": "import { compose } from './compose'"}]},
+    {"id": "c26", "type": "源码事实", "text": "matcher 构建后再注册路由会报错（Router 有注册期/已构建两个状态）。", "confidence": "high", "anchors": [{"path": "src/router.ts", "start": 21, "end": 22, "quote": "'Can not add a route since the matcher is already built.'"}]},
+    {"id": "c27", "type": "源码事实", "text": "定稿后调用 header() 会先克隆 Response 再修改头。", "confidence": "high", "anchors": [{"path": "src/context.ts", "start": 519, "end": 522, "quote": "this.#res = createResponseInstance((this.#res as Response).body, this.#res)"}]},
+    {"id": "c28", "type": "源码事实", "text": "内置中间件广泛使用 await next() 洋葱写法（ast-grep 命中 36 处）。", "confidence": "high", "anchors": [{"path": "src/middleware/basic-auth/index.ts", "start": 113, "end": 113, "quote": "await next()"}]},
+    {"id": "c29", "type": "源码事实", "text": "c.res 首次访问时才用预备的 Headers 创建 Response。", "confidence": "high", "anchors": [{"path": "src/context.ts", "start": 403, "end": 407, "quote": "headers: (this.#preparedHeaders ??= new Headers()),"}]},
+    {"id": "c30", "type": "报告综合", "text": "近一年改动最多的文件是 aws-lambda adapter handler，说明平台适配是持续成本。", "confidence": "medium", "anchors": []},
+    {"id": "c31", "type": "源码事实", "text": "存在 UnsupportedPathError，供路由实现声明不支持的路径模式。", "confidence": "high", "anchors": [{"path": "src/router.ts", "start": 103, "end": 103, "quote": "export class UnsupportedPathError extends Error {}"}]},
+    {"id": "c32", "type": "源码事实", "text": "body 已被直接消费且未缓存时，克隆请求会抛 500，并提示改用 HonoRequest 方法。", "confidence": "high", "anchors": [{"path": "src/request.ts", "start": 486, "end": 491, "quote": "Cannot clone request: body was already consumed and not cached."}]}
+  ]
+}

@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hubradar"
+version = "0.1.0"
+description = "Evidence-backed repository distillation and domain radar for developers."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "ast-grep-py>=0.28,<1",
+  "networkx>=3.2,<4",
+  "markdown-it-py>=3,<5",
+  "bleach>=6.1,<7",
+]
+
+[project.optional-dependencies]
+browser-test = ["websocket-client>=1.8,<2"]
+
+[project.scripts]
+hubradar = "hubradar.cli:main"
+
+[tool.setuptools]
+packages = ["hubradar", "hubradar.assets", "hubradar.assets.vendor"]
+
+[tool.setuptools.package-data]
+hubradar = ["assets/*.css", "assets/*.js", "assets/vendor/*.js", "assets/vendor/*.txt", "assets/vendor/*.json", "assets/vendor/*.md"]
+

@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="color-scheme" content="light dark"><title>领域雷达：给 AI/Agent 用的代码理解工具（2026-10-20） · HubRadar</title>
+<style>:root{--bg:#fff;--surface:#f8fafc;--tint:#f1f5f9;--text:#0f172a;--secondary:#334155;--muted:#64748b;--line:#e2e8f0;--blue:#2563eb;--blue-bg:#eff6ff;--purple:#7c3aed;--purple-bg:#faf5ff;--green:#059669;--code-bg:#1e293b;--code-text:#f8fafc;color-scheme:light}
+:root[data-theme=dark]{--bg:#0f172a;--surface:#172236;--tint:#223149;--text:#e2e8f0;--secondary:#cbd5e1;--muted:#94a3b8;--line:#334155;--blue:#93c5fd;--blue-bg:#1e3a5f;--purple:#c4b5fd;--purple-bg:#31264b;--green:#6ee7b7;--code-bg:#080f1d;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:25px}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}button,input{font:inherit}button{cursor:pointer;background:var(--bg);color:var(--secondary);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:13px;min-height:36px}button:hover{border-color:var(--blue);color:var(--blue)}:focus-visible{outline:3px solid var(--blue);outline-offset:3px}a{color:var(--blue);text-underline-offset:3px;overflow-wrap:anywhere}a:hover{text-decoration-thickness:2px}.shell{max-width:1120px;margin:auto;padding:24px 24px 64px;min-width:0}.masthead{display:flex;justify-content:space-between;gap:16px;align-items:center;border-bottom:2px solid var(--line);padding-bottom:22px;margin-bottom:28px}.brand{font-weight:800;letter-spacing:-.7px;color:var(--text);text-decoration:none;font-size:23px}.actions{display:flex;gap:8px;flex-wrap:wrap}.badge-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}.badge{border:1px solid var(--line);background:var(--tint);color:var(--secondary);border-radius:99px;font-size:12px;padding:3px 12px;font-weight:600}.badge.blue{color:var(--blue);background:var(--blue-bg)}.badge.purple{color:var(--purple);background:var(--purple-bg)}.toc-card{border:1px solid var(--line);border-radius:14px;padding:22px 26px;background:var(--bg);box-shadow:0 4px 16px -2px #0f172a08;margin-bottom:36px}.toc-top{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}.toc-top span{font-size:12px;color:var(--muted)}.toc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px}.toc-grid a{display:flex;align-items:baseline;gap:12px;text-decoration:none;background:var(--surface);padding:10px 14px;border:1px solid var(--line);border-radius:8px;font-size:14px;color:var(--secondary)}.toc-grid a:hover{border-color:var(--blue);color:var(--blue)}.toc-grid span{color:var(--blue);font:12px ui-monospace,monospace}h1{font-size:32px;letter-spacing:-.6px;line-height:1.4;margin:0 0 20px;font-weight:800;text-wrap:balance;overflow-wrap:anywhere}h2{font-size:24px;letter-spacing:-.3px;margin:46px 0 20px;padding-bottom:10px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}h3{font-size:19px;margin:28px 0 12px}p{margin:14px 0;overflow-wrap:anywhere}blockquote{margin:18px 0 26px;background:var(--blue-bg);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:12px 20px;font-size:14px;color:var(--secondary)}blockquote p{margin:0}ul,ol{padding-left:26px}li{margin:9px 0;overflow-wrap:anywhere}strong{font-weight:650}code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86em;background:var(--tint);padding:2px 5px;border-radius:4px;overflow-wrap:anywhere}pre{position:relative;background:var(--code-bg);color:var(--code-text);padding:22px 24px;border-radius:12px;overflow:auto;line-height:1.65;font-size:13px;tab-size:2;max-width:100%}pre code{background:none;color:inherit;padding:0;white-space:pre;font-size:inherit;overflow-wrap:normal}.copy-code{position:absolute;right:8px;top:8px;background:#334155;color:#e2e8f0;border-color:#475569;font-size:11px;min-height:28px;padding:3px 8px}.table-wrap{max-width:100%;overflow:auto;border:1px solid var(--line);border-radius:12px;margin:20px 0;position:relative}table{border-collapse:collapse;width:100%;font-size:13px;line-height:1.7}thead{background:var(--surface)}th,td{text-align:left;border-bottom:1px solid var(--line);padding:13px 16px;vertical-align:top}tr:last-child td{border-bottom:0}th{font-weight:650;white-space:nowrap}td{min-width:100px}td:nth-child(2){min-width:210px}td a{display:inline-block;max-width:360px}.radar-table{min-width:1280px}.radar-table td:last-child{min-width:280px}.radar-table td:nth-child(7){white-space:nowrap;font-size:14px}.sort-button{font-weight:650;padding:0;border:0;background:none;text-align:left;font-size:inherit;min-height:28px}.sort-button:after{content:" ↕";font-size:11px;color:var(--muted)}[aria-sort=ascending] .sort-button:after{content:" ↑"}[aria-sort=descending] .sort-button:after{content:" ↓"}.tier{white-space:nowrap;border-radius:6px;padding:3px 7px;font-size:12px;background:var(--tint)}.tier-burst{background:#fff7ed;color:#c2410c}.tier-new{background:var(--purple-bg);color:var(--purple)}.tier-base{background:#ecfdf5;color:#047857}.filter-bar{display:flex;align-items:center;gap:12px;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:24px;font-size:13px}.filter-bar[hidden]{display:none}.filter-bar input{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 12px;flex:1;min-width:0}.filter-bar output{color:var(--muted);white-space:nowrap}details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:20px 0}summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--purple)}details[open]>summary{margin-bottom:16px}sub{font-size:12px;color:var(--muted);vertical-align:baseline}hr{border:0;border-top:1px solid var(--line);margin:32px 0}footer{border-top:1px solid var(--line);margin-top:48px;padding-top:20px;font-size:12px;color:var(--muted);display:flex;gap:20px;justify-content:space-between;flex-wrap:wrap}.reading-progress{position:fixed;top:0;left:0;width:0;height:3px;background:var(--blue);z-index:20}.skip-link{position:absolute;top:-80px;left:12px;padding:10px;background:var(--bg);z-index:30}.skip-link:focus{top:8px}.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0)}[hidden]{display:none!important}
+@media(max-width:640px){.shell{padding:18px 16px 44px}.masthead{align-items:flex-start;flex-direction:column;gap:12px}.brand{font-size:21px}.actions{gap:6px}.actions button{font-size:12px}h1{font-size:26px}h2{font-size:21px}.toc-card{padding:16px}.toc-grid{grid-template-columns:1fr}.toc-grid a{font-size:13px}.filter-bar{flex-wrap:wrap}.filter-bar label{width:100%}.filter-bar output{font-size:12px}pre{padding:18px 14px;font-size:12px}th,td{padding:10px 12px}.diagram-bar{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media print{:root,:root[data-theme=dark]{--bg:#fff;--surface:#f8fafc;--text:#0f172a;--secondary:#334155;--muted:#64748b;--line:#ddd;--blue:#2563eb;--blue-bg:#eff6ff;--purple-bg:#faf5ff;--tint:#f1f5f9}.actions,.reading-progress,.filter-bar,.copy-code,.diagram-bar button{display:none}.shell{max-width:none;padding:0}.toc-card{box-shadow:none}.table-wrap,.diagram-scroll,pre{overflow:visible}table{font-size:8px;min-width:0!important}td,td:nth-child(2),.radar-table td:last-child{min-width:0}th,td{padding:5px}pre{white-space:pre-wrap}pre code{white-space:pre-wrap}.diagram-scroll svg{width:100%!important}h2{break-after:avoid}tr,blockquote{break-inside:avoid}a{color:inherit}}
+
+/* Mermaid owns diagram layout; HubRadar owns framing and responsive scale. */
+.diagram-card{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:22px 0;background:var(--surface)}
+.diagram-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted);flex-wrap:wrap}
+.diagram-controls{display:flex;align-items:center;gap:5px;flex-wrap:wrap}.diagram-controls label{display:flex;align-items:center;gap:6px}
+.diagram-controls select{font:inherit;color:var(--secondary);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px;min-height:32px}
+.diagram-bar button{min-height:32px;padding:2px 10px}
+.diagram-scroll{overflow:auto;max-width:100%;padding:16px;scrollbar-gutter:stable}
+.mermaid-target{min-width:0}.mermaid-target[aria-busy=true]:empty{min-height:100px}
+.mermaid-target svg, .dsh-svg-target svg{display:block;max-width:none!important;height:auto;margin-inline:auto;overflow:visible}
+.mermaid-staging{position:absolute;left:-100000px;top:0;visibility:hidden;pointer-events:none}
+.diagram-source{border:0;border-top:1px solid var(--line);border-radius:0;margin:0;font-size:12px}.diagram-source summary{font-size:12px;color:var(--muted)}
+.diagram-error{color:var(--secondary);font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}
+@media print{.diagram-controls{display:none}.mermaid-target svg{max-width:100%!important;width:100%!important}.diagram-card{break-inside:avoid}}
+</style></head><body>
+<a href="#report" class="skip-link">跳到报告正文</a><div class="reading-progress" aria-hidden="true"></div>
+<div class="shell"><header class="masthead"><a class="brand" href="#top">◎ HubRadar</a>
+<div class="actions"><button id="theme" type="button" aria-pressed="false">深色模式</button>
+<button id="expand" type="button" aria-pressed="false">展开详情</button><button id="print" type="button">打印 / PDF</button></div></header>
+<main id="top"><div class="badge-bar"><span class="badge blue">领域雷达</span><span class="badge purple">源码 · 结构 · 取舍</span><span class="badge">离线阅读</span></div>
+<h1>领域雷达：给 AI/Agent 用的代码理解工具（2026-10-20）</h1>
+<nav class="toc-card" aria-label="报告目录"><div class="toc-top"><strong>阅读导航</strong><span>04 个章节</span></div><div class="toc-grid"><a href="#section-1"><span>01</span>版图（topic 共现聚类，前 6 簇）</a><a href="#section-2"><span>02</span>分层</a><a href="#section-3"><span>03</span>数据质量</a><a href="#section-4"><span>04</span>查询切片</a></div></nav>
+<div class="filter-bar" hidden><label for="table-search">筛选仓库</label><input id="table-search" type="search" placeholder="仓库、分层、关键词…" autocomplete="off"><output id="row-count" aria-live="polite"></output></div>
+<article id="report"><blockquote>
+<p>候选 111 → GraphQL 补全 111 → star 曲线 78/87 → 入表 74；爆发阈值 v7≥max(200, P90=122) 且加速度≥3</p>
+</blockquote>
+<h2 id="section-1">版图（topic 共现聚类，前 6 簇）</h2>
+<ul>
+<li>簇 1（42 个 topic）：developer-tools · code-intelligence · ai-agents · mcp · code-search · mcp-server</li>
+<li>簇 2（33 个 topic）：claude-code · code-analysis · codex · knowledge-graph · ast · agent-skills</li>
+<li>簇 3（23 个 topic）：claude · cursor · documentation · agent-orchestration · agent-memory · agent</li>
+<li>簇 4（23 个 topic）：cli · openai · gemini · github · chatgpt · model-context-protocol</li>
+<li>簇 5（20 个 topic）：ai-coding · coding-agent · golang · ai-tools · vibe-coding · context-engineering</li>
+<li>簇 6（15 个 topic）：codebase-analysis · static-analysis · code-understanding · call-graph · code-generation · claude-code-skill</li>
+</ul>
+<h2 id="section-2">分层</h2>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>仓库</th>
+<th>★</th>
+<th>近7天</th>
+<th>近28天</th>
+<th>加速度</th>
+<th>近12周</th>
+<th>采用（依赖方或月下载）</th>
+<th>90天提交</th>
+<th>标记</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>新星</td>
+<td><a href="https://github.com/trailhq/Trail-Code">trailhq/Trail-Code</a></td>
+<td>10,471</td>
+<td>494</td>
+<td>1,584</td>
+<td>0.68</td>
+<td><code>▄▄█▆▃▆█▅▂▂▃▃</code></td>
+<td>27,454/月</td>
+<td>380</td>
+<td></td>
+<td>Turbocharge Claude Code, Cursor, Codex, Gemini &amp; every coding agent: f</td>
+</tr>
+<tr>
+<td>新星</td>
+<td><a href="https://github.com/AxiomCodeAI/axiomcodegraph">AxiomCodeAI/axiomcodegraph</a></td>
+<td>237</td>
+<td>119</td>
+<td>235</td>
+<td>119.0</td>
+<td><code>▁▁▁▁▁▁▄▄█</code></td>
+<td>-</td>
+<td>1906</td>
+<td></td>
+<td>Turn any codebase into a knowledge graph grounded in formal methods. Y</td>
+</tr>
+<tr>
+<td>新星</td>
+<td><a href="https://github.com/aoci-spec/aoci-code">aoci-spec/aoci-code</a></td>
+<td>1,636</td>
+<td>109</td>
+<td>1,179</td>
+<td>1.03</td>
+<td><code>▁▁▂▂▁▂▂▄█▅▂</code></td>
+<td>0/月</td>
+<td>281</td>
+<td></td>
+<td>A persistent, Git-versioned map of your whole codebase and database sc</td>
+</tr>
+<tr>
+<td>新星</td>
+<td><a href="https://github.com/MichaelKinsy/PiG">MichaelKinsy/PiG</a></td>
+<td>661</td>
+<td>63</td>
+<td>657</td>
+<td>0.47</td>
+<td><code>▁█▅▂▂</code></td>
+<td>4,987/月</td>
+<td>115</td>
+<td></td>
+<td>PiG (Pi in Go) is a faithful Go port of upstream Pi, the TypeScript co</td>
+</tr>
+<tr>
+<td>新星</td>
+<td><a href="https://github.com/FinanceFlash/unvibecode">FinanceFlash/unvibecode</a></td>
+<td>323</td>
+<td>59</td>
+<td>202</td>
+<td>7.38</td>
+<td><code>▁▅▁▁▁▁▂▁▁█▄</code></td>
+<td>-</td>
+<td>251</td>
+<td></td>
+<td>Complex code hides connections, workflows, and business risks.Unvibe c</td>
+</tr>
+<tr>
+<td>新星</td>
+<td><a href="https://github.com/Sidiora-Labs/hyperfide">Sidiora-Labs/hyperfide</a></td>
+<td>433</td>
+<td>2</td>
+<td>418</td>
+<td>2.0</td>
+<td><code>▁▁▁▁▁▁█▅▅▁</code></td>
+<td>-</td>
+<td>3369</td>
+<td></td>
+<td>The ai agent workflow tool that scales from small, simple projects to</td>
+</tr>
+<tr>
+<td>新星</td>
+<td><a href="https://github.com/Raja0sama/vibex">Raja0sama/vibex</a></td>
+<td>389</td>
+<td>0</td>
+<td>385</td>
+<td>0.0</td>
+<td><code>▁▁█▁▁</code></td>
+<td>-</td>
+<td>71</td>
+<td></td>
+<td>Architecture diagrams and checkable docs from your codebase — ERD, C4,</td>
+</tr>
+<tr>
+<td>基石</td>
+<td><a href="https://github.com/Graphify-Labs/graphify">Graphify-Labs/graphify</a></td>
+<td>129,418</td>
+<td>3,278</td>
+<td>9,414</td>
+<td>1.41</td>
+<td><code>█▅▅▅▆▅▄▅▄▄▄▆</code></td>
+<td>1,630,115/月</td>
+<td>1206</td>
+<td></td>
+<td>Turn any codebase, with its docs, SQL schemas, configs, and PDFs, into</td>
+</tr>
+<tr>
+<td>基石</td>
+<td><a href="https://github.com/Aider-AI/aider">Aider-AI/aider</a></td>
+<td>49,653</td>
+<td>155</td>
+<td>672</td>
+<td>0.84</td>
+<td><code>████▇█▇▆▇▆▇▆</code></td>
+<td>-</td>
+<td>0</td>
+<td>90 天提交&lt;5</td>
+<td>aider is AI pair programming in your terminal</td>
+</tr>
+<tr>
+<td>基石</td>
+<td><a href="https://github.com/yamadashy/repomix">yamadashy/repomix</a></td>
+<td>28,923</td>
+<td>122</td>
+<td>531</td>
+<td>1.01</td>
+<td><code>▇▇█▆▅▅▆▅▇▆▅▆</code></td>
+<td>589,156/月</td>
+<td>332</td>
+<td></td>
+<td>📦 Repomix is a powerful tool that packs your entire repository into a</td>
+</tr>
+<tr>
+<td>基石</td>
+<td><a href="https://github.com/coderamp-labs/gitingest">coderamp-labs/gitingest</a></td>
+<td>15,961</td>
+<td>56</td>
+<td>402</td>
+<td>0.83</td>
+<td><code>▂▂▂▂▂▃▄██▆▄▃</code></td>
+<td>163,303/月</td>
+<td>0</td>
+<td>90 天提交&lt;5</td>
+<td>Replace 'hub' with 'ingest' in any GitHub URL to get a prompt-friendly</td>
+</tr>
+<tr>
+<td>主流/长尾</td>
+<td><a href="https://github.com/tt-a1i/archify">tt-a1i/archify</a></td>
+<td>86,042</td>
+<td>2,926</td>
+<td>16,308</td>
+<td>0.54</td>
+<td><code>▁▁▁▁█▄▃▂▂▂▂▁</code></td>
+<td>33,078/月</td>
+<td>1676</td>
+<td></td>
+<td>Turn any idea, plan, or codebase into a beautiful interactive diagram.</td>
+</tr>
+<tr>
+<td>主流/长尾</td>
+<td><a href="https://github.com/Egonex-AI/Understand-Anything">Egonex-AI/Understand-Anything</a></td>
+<td>87,107</td>
+<td>971</td>
+<td>3,604</td>
+<td>1.19</td>
+<td><code>▆█▅▅▅▄▇▅▆▅▅▆</code></td>
+<td>0/月</td>
+<td>102</td>
+<td></td>
+<td>Graphs that teach &gt; graphs that impress. Turn any code into an interac</td>
+</tr>
+<tr>
+<td>主流/长尾</td>
+<td><a href="https://github.com/DeusData/codebase-memory-mcp">DeusData/codebase-memory-mcp</a></td>
+<td>46,984</td>
+<td>507</td>
+<td>2,934</td>
+<td>0.56</td>
+<td><code>██▆██▆▅▆█▃▅▄</code></td>
+<td>61,005/月</td>
+<td>2653</td>
+<td></td>
+<td>High-performance code intelligence MCP server. Indexes codebases into</td>
+</tr>
+<tr>
+<td>主流/长尾</td>
+<td><a href="https://github.com/repowise-dev/repowise">repowise-dev/repowise</a></td>
+<td>7,865</td>
+<td>204</td>
+<td>951</td>
+<td>1.08</td>
+<td><code>▄▅█▂▁▁▃▃▂▁▅▂</code></td>
+<td>22,639/月</td>
+<td>2296</td>
+<td></td>
+<td>Codebase intelligence for AI and humans: code health scores, auto-gene</td>
+</tr>
+<tr>
+<td>主流/长尾</td>
+<td><a href="https://github.com/ahmedkhaleel2004/gitdiagram">ahmedkhaleel2004/gitdiagram</a></td>
+<td>18,332</td>
+<td>168</td>
+<td>1,430</td>
+<td>1.14</td>
+<td><code>▁▁▁▁▁▁▁█▆▄▃▂</code></td>
+<td>0/月</td>
+<td>448</td>
+<td></td>
+<td>Visualize any GitHub codebase: free interactive architecture diagrams</td>
+</tr>
+<tr>
+<td>主流/长尾</td>
+<td><a href="https://github.com/AsyncFuncAI/deepwiki-open">AsyncFuncAI/deepwiki-open</a></td>
+<td>18,231</td>
+<td>54</td>
+<td>229</td>
+<td>0.77</td>
+<td><code>▇▇███▆▇▆▆▄▇▅</code></td>
+<td>0/月</td>
+<td>20</td>
+<td></td>
+<td>Open Source DeepWiki: AI-Powered Wiki Generator for GitHub/Gitlab/Bitb</td>
+</tr>
+<tr>
+<td>主流/长尾</td>
+<td><a href="https://github.com/vitali87/code-graph-rag">vitali87/code-graph-rag</a></td>
+<td>5,268</td>
+<td>22</td>
+<td>124</td>
+<td>0.49</td>
+<td><code>▁█▅▂▁▂▁▁▁▁▁▁</code></td>
+<td>0/月</td>
+<td>6778</td>
+<td></td>
+<td>The ultimate RAG for your monorepo. Query, understand, and edit multi-</td>
+</tr>
+<tr>
+<td>主流/长尾</td>
+<td><a href="https://github.com/giancarloerra/SocratiCode">giancarloerra/SocratiCode</a></td>
+<td>3,346</td>
+<td>13</td>
+<td>40</td>
+<td>1.08</td>
+<td><code>▇█▃▃▂▃▂▃▂▂▁▂</code></td>
+<td>32,199/月</td>
+<td>390</td>
+<td></td>
+<td>Enterprise-grade (40m+ LOC) codebase intelligence, zero-setup, local &amp;</td>
+</tr>
+<tr>
+<td>主流/长尾</td>
+<td><a href="https://github.com/sopaco/deepwiki-rs">sopaco/deepwiki-rs</a></td>
+<td>3,135</td>
+<td>12</td>
+<td>59</td>
+<td>0.8</td>
+<td><code>▁▃▁▁▁▁█▂▁▁▁▁</code></td>
+<td>8,608/月</td>
+<td>21</td>
+<td></td>
+<td>Turn code into clarity. Generate accurate technical docs and AI-ready</td>
+</tr>
+<tr>
+<td>主流/长尾</td>
+<td><a href="https://github.com/sourcebot-dev/sourcebot">sourcebot-dev/sourcebot</a></td>
+<td>4,000</td>
+<td>10</td>
+<td>61</td>
+<td>0.83</td>
+<td><code>▁█▃▁▁▁▁▁▁▂▁▁</code></td>
+<td>1,415/月</td>
+<td>176</td>
+<td></td>
+<td>Sourcebot is a self-hosted tool that helps humans and agents understan</td>
+</tr>
+<tr>
+<td>主流/长尾</td>
+<td><a href="https://github.com/AIDotNet/OpenDeepWiki">AIDotNet/OpenDeepWiki</a></td>
+<td>3,634</td>
+<td>9</td>
+<td>36</td>
+<td>0.64</td>
+<td><code>▃█▁▃▃▃▂▂▁▁▂▂</code></td>
+<td>0/月</td>
+<td>64</td>
+<td></td>
+<td>OpenDeepWiki is the open-source version of the DeepWiki project, aimin</td>
+</tr>
+<tr>
+<td>主流/长尾</td>
+<td><a href="https://github.com/Ataraxy-Labs/sem">Ataraxy-Labs/sem</a></td>
+<td>3,415</td>
+<td>7</td>
+<td>64</td>
+<td>0.48</td>
+<td><code>▃▆▄▄▄▃▄▃▃█▄▂</code></td>
+<td>74,823/月</td>
+<td>142</td>
+<td></td>
+<td>Semantic version control =&gt; entity-level diffs, blame, and impact anal</td>
+</tr>
+<tr>
+<td>衰退/沉寂</td>
+<td><a href="https://github.com/regenrek/deepwiki-mcp">regenrek/deepwiki-mcp</a></td>
+<td>1,386</td>
+<td>1</td>
+<td>3</td>
+<td>1.0</td>
+<td><code>▁▇▄▁▁█▂▄▁▄▁▂</code></td>
+<td>10,006/月</td>
+<td>0</td>
+<td></td>
+<td>📖 MCP server for fetch deepwiki.com and get latest knowledge in Cursor</td>
+</tr>
+<tr>
+<td>衰退/沉寂</td>
+<td><a href="https://github.com/salesforce/CodeT5">salesforce/CodeT5</a></td>
+<td>3,092</td>
+<td>0</td>
+<td>2</td>
+<td>0.0</td>
+<td><code>▄▁▁▁▁▁▁▁▁█▁▁</code></td>
+<td>0/月</td>
+<td>0</td>
+<td></td>
+<td>Home of CodeT5: Open Code LLMs for Code Understanding and Generation</td>
+</tr>
+</tbody>
+</table>
+<h2 id="section-3">数据质量</h2>
+<ul>
+<li>star 历史：<code>GET /repos/{o}/{r}/stargazers/history</code>（API 版本 2026-03-10），成功 78/87</li>
+<li>stargazer 列表接口已对非协作者关闭：反刷星只用聚合信号，命中标记即“热度未验证”，不剔除</li>
+<li>依赖方：ecosyste.ms packages lookup，仅前 40 个候选；未发包的仓库显示“-”</li>
+<li>未使用：GH Archive / OSS Insight 事件排行 / ClickHouse github_events（2026 年数据缺失）</li>
+<li>耗时：{&quot;search_s&quot;: 63.8, &quot;graphql_s&quot;: 45.4, &quot;star_history_s&quot;: 42.1, &quot;adoption_s&quot;: 82.6, &quot;total_s&quot;: 233.9}</li>
+</ul>
+<h2 id="section-4">查询切片</h2>
+<ul>
+<li><code>topic:code-intelligence stars:&gt;100 pushed:&gt;2026-04-20</code> → total 39，取 30</li>
+<li><code>topic:codebase-analysis stars:&gt;50 pushed:&gt;2026-04-20</code> → total 12，取 12</li>
+<li><code>topic:code-graph stars:&gt;50 pushed:&gt;2026-04-20</code> → total 17，取 17</li>
+<li><code>codebase knowledge graph in:description stars:&gt;200 pushed:&gt;2026-04-20</code> → total 13，取 13</li>
+<li><code>codebase llm context in:description stars:&gt;200 pushed:&gt;2026-04-20</code> → total 2，取 2</li>
+<li><code>deepwiki in:name,description stars:&gt;100</code> → total 12，取 12</li>
+<li><code>repository map llm in:description stars:&gt;100</code> → total 0，取 0</li>
+<li><code>codebase in:description created:&gt;2026-07-20 stars:&gt;200</code> → total 12，取 12</li>
+<li><code>agent skill codebase in:description,topics stars:&gt;20 created:&gt;2026-04-01</code> → total 16，取 16</li>
+</ul>
+</article></main>
+<footer>HubRadar · 带着证据理解代码。引用校验不替代语义复核或运行测试。<a href="#top">回到顶部 ↑</a></footer></div>
+<div id="notice" class="sr-only" aria-live="polite"></div>
+
+<script id="hubradar-interactions">(() => {
+  "use strict";
+  const all = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+  const announce = text => { document.getElementById("notice").textContent = text; };
+  const themeButton = document.getElementById("theme");
+  function setTheme(dark) {
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    themeButton.textContent = dark ? "浅色模式" : "深色模式";
+    themeButton.setAttribute("aria-pressed", String(dark));
+  }
+  try { setTheme(localStorage.getItem("hubradar-theme") === "dark"); } catch (_) { setTheme(false); }
+  themeButton.addEventListener("click", () => {
+    const dark = document.documentElement.dataset.theme !== "dark";
+    setTheme(dark);
+    try { localStorage.setItem("hubradar-theme", dark ? "dark" : "light"); } catch (_) {}
+    requestDiagramRender();
+  });
+  const expand = document.getElementById("expand");
+  expand.addEventListener("click", () => {
+    const open = expand.getAttribute("aria-pressed") !== "true";
+    all("article details").forEach(detail => { detail.open = open; });
+    expand.setAttribute("aria-pressed", String(open));
+    expand.textContent = open ? "收起详情" : "展开详情";
+  });
+  document.getElementById("print").addEventListener("click", () => window.print());
+  let printState = [];
+  window.addEventListener("beforeprint", () => {
+    printState = all("article details").map(node => [node, node.open]);
+    printState.forEach(([node]) => { node.open = true; });
+  });
+  window.addEventListener("afterprint", () => printState.forEach(([node, open]) => { node.open = open; }));
+  all("pre").forEach(pre => {
+    const code = pre.querySelector("code");
+    if (!code) return;
+    const button = document.createElement("button");
+    button.type = "button"; button.className = "copy-code"; button.textContent = "复制";
+    button.addEventListener("click", async () => {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(code.textContent);
+        } else {
+          const input = document.createElement("textarea");
+          input.value = code.textContent; input.className = "sr-only";
+          document.body.append(input); input.select();
+          const copied = document.execCommand("copy"); input.remove();
+          if (!copied) throw new Error("copy unavailable");
+          button.focus();
+        }
+        button.textContent = "已复制"; announce("代码已复制");
+        setTimeout(() => { button.textContent = "复制"; }, 1800);
+      } catch (_) { button.textContent = "请选中复制"; announce("无法自动复制，请选中代码复制"); }
+    });
+    pre.append(button);
+  });
+  const radarRows = [];
+  all("article table").forEach(table => {
+    const wrap = document.createElement("div");
+    wrap.className = "table-wrap"; wrap.tabIndex = 0;
+    wrap.setAttribute("aria-label", "可横向滚动的数据表");
+    table.before(wrap); wrap.append(table);
+    const headers = all("th", table);
+    const isRadar = headers.some(th => th.textContent.trim() === "仓库");
+    if (isRadar) {
+      table.classList.add("radar-table");
+      all("tbody tr", table).forEach(row => {
+        radarRows.push(row);
+        const cell = row.cells[0], text = cell.textContent.trim(), badge = document.createElement("span");
+        badge.className = "tier" + (text === "爆发" ? " tier-burst" : text === "新星" ? " tier-new" : text === "基石" ? " tier-base" : "");
+        badge.textContent = text; cell.textContent = ""; cell.append(badge);
+      });
+    }
+    headers.forEach((th, index) => {
+      const button = document.createElement("button");
+      button.type = "button"; button.className = "sort-button"; button.textContent = th.textContent;
+      th.textContent = ""; th.append(button); th.setAttribute("aria-sort", "none");
+      button.addEventListener("click", () => {
+        const sign = th.getAttribute("aria-sort") === "ascending" ? -1 : 1;
+        headers.forEach(other => other.setAttribute("aria-sort", "none"));
+        th.setAttribute("aria-sort", sign === 1 ? "ascending" : "descending");
+        const text = row => row.cells[index].textContent.trim();
+        const number = value => /^-?[\d,.]+(?:\/月| 依赖方)?$/.test(value) ? Number(value.replace(/,/g, "").split(/[ /]/)[0]) : null;
+        const rows = all("tbody tr", table).sort((a, b) => {
+          const x = text(a), y = text(b), nx = number(x), ny = number(y);
+          return sign * (nx !== null && ny !== null ? nx - ny : x.localeCompare(y, "zh-CN", { numeric: true }));
+        });
+        rows.forEach(row => table.tBodies[0].append(row));
+      });
+    });
+  });
+  if (radarRows.length) {
+    document.querySelector(".filter-bar").hidden = false;
+    const search = document.getElementById("table-search"), count = document.getElementById("row-count");
+    const filter = () => {
+      const query = search.value.trim().toLocaleLowerCase();
+      radarRows.forEach(row => { row.hidden = !row.textContent.toLocaleLowerCase().includes(query); });
+      count.textContent = `${radarRows.filter(row => !row.hidden).length} / ${radarRows.length} 项`;
+    };
+    search.addEventListener("input", filter); filter();
+  }
+  const diagramCards = all(".diagram-card");
+  let renderQueue = Promise.resolve(), renderGeneration = 0, diagramSerial = 0;
+  const fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
+  function diagramConfig(dark) {
+    const surface = dark ? "#172236" : "#f8fafc";
+    const text = dark ? "#e2e8f0" : "#0f172a";
+    const stroke = dark ? "#94a3b8" : "#64748b";
+    return {
+      startOnLoad: false, securityLevel: "strict", suppressErrorRendering: true,
+      theme: "base", look: "classic", layout: "dagre", fontFamily, fontSize: 16,
+      htmlLabels: false, maxTextSize: 100000, maxEdges: 500,
+      // User-authored diagrams cannot replace the report's security or theme.
+      secure: ["securityLevel", "startOnLoad", "suppressErrorRendering", "maxTextSize", "maxEdges",
+        "theme", "themeCSS", "themeVariables", "fontFamily", "fontSize", "htmlLabels", "flowchart", "state", "layout", "look"],
+      flowchart: { htmlLabels: false, useMaxWidth: false, curve: "step", padding: 16,
+        nodeSpacing: 32, rankSpacing: 42, diagramPadding: 24, wrappingWidth: 180 },
+      state: { useMaxWidth: false, padding: 20, nodeSpacing: 36, rankSpacing: 48,
+        fontSize: 16, radius: 10, defaultRenderer: "dagre-wrapper" },
+      sequence: { useMaxWidth: false, wrap: true, diagramMarginX: 24, diagramMarginY: 24 },
+      themeVariables: {
+        darkMode: dark, background: surface, fontFamily, fontSize: "16px",
+        primaryColor: dark ? "#213654" : "#eff6ff",
+        primaryBorderColor: dark ? "#7097c7" : "#93b4dd",
+        primaryTextColor: text, secondaryColor: dark ? "#34294c" : "#faf5ff",
+        secondaryTextColor: text, secondaryBorderColor: dark ? "#a78bca" : "#c4b5db",
+        tertiaryColor: dark ? "#203c36" : "#ecfdf5", tertiaryTextColor: text,
+        lineColor: stroke, textColor: text, edgeLabelBackground: surface,
+        mainBkg: dark ? "#213654" : "#eff6ff", nodeTextColor: text,
+        noteBkgColor: dark ? "#3a3425" : "#fffbeb", noteTextColor: text,
+        labelColor: text, labelBoxBkgColor: surface,
+      },
+      themeCSS: `.node rect, .statediagram-state rect { rx: 10px; ry: 10px; }
+        .edgeLabel rect, .edgeLabel .label-container { fill: ${surface} !important; opacity: 1 !important; }
+        .edgeLabel text { fill: ${text}; }
+        .nodeLabel, .edgeLabel, text { font-family: ${fontFamily}; }`,
+    };
+  }
+  function availableWidth(card) {
+    return Math.max(180, card.querySelector(".diagram-scroll").clientWidth - 32);
+  }
+  function sizeDiagram(svg, scale) {
+    const width = Number(svg.dataset.width);
+    svg.dataset.scale = String(scale);
+    svg.style.width = `${width * scale}px`;
+    svg.style.maxWidth = "none";
+    svg.style.height = "auto";
+  }
+  function fitDiagram(card) {
+    const svg = card.querySelector(".mermaid-target svg");
+    if (svg) sizeDiagram(svg, Math.min(1, availableWidth(card) / Number(svg.dataset.width)));
+  }
+  function includeRenderedBounds(svg) {
+    // Mermaid owns all layout. Expand only its viewport, using measured SVG
+    // geometry plus marker/stroke padding so self-loop labels cannot be cropped.
+    const bounds = svg.getBBox();
+    if (![bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isFinite) || bounds.width <= 0 || bounds.height <= 0) {
+      throw new Error("Mermaid 未产生有效图形边界");
+    }
+    const padding = 24;
+    const width = bounds.width + padding * 2, height = bounds.height + padding * 2;
+    svg.setAttribute("viewBox", `${bounds.x - padding} ${bounds.y - padding} ${width} ${height}`);
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+    svg.setAttribute("preserveAspectRatio", "xMidYMin meet");
+    svg.dataset.width = String(width);
+    svg.dataset.height = String(height);
+  }
+  async function renderOne(card, source) {
+    const target = card.querySelector(".mermaid-target");
+    const stage = document.createElement("div");
+    stage.className = "mermaid-staging";
+    stage.style.width = `${availableWidth(card)}px`;
+    document.body.append(stage);
+    try {
+      const result = await window.mermaid.render(`hubradar-diagram-${++diagramSerial}`, source, stage);
+      // Mermaid's strict renderer sanitizes the SVG; the raw Markdown source is
+      // never assigned as HTML, and diagram callbacks are intentionally unused.
+      target.innerHTML = result.svg;
+      const svg = target.querySelector("svg");
+      if (!svg) throw new Error("Mermaid 未返回 SVG");
+      includeRenderedBounds(svg);
+      return svg;
+    } finally {
+      stage.remove();
+    }
+  }
+  function requestDiagramRender() {
+    const generation = ++renderGeneration;
+    document.documentElement.dataset.diagramsReady = "false";
+    renderQueue = renderQueue.catch(() => {}).then(async () => {
+      if (generation !== renderGeneration) return;
+      if (document.fonts) await document.fonts.ready;
+      const dark = document.documentElement.dataset.theme === "dark";
+      if (diagramCards.length && window.mermaid) window.mermaid.initialize(diagramConfig(dark));
+      for (const card of diagramCards) {
+        if (card.classList.contains("dsh-architecture")) continue;
+        if (generation !== renderGeneration) return;
+        const target = card.querySelector(".mermaid-target"), status = card.querySelector(".diagram-status");
+        target.setAttribute("aria-busy", "true");
+        card.dataset.diagramStatus = "pending";
+        status.textContent = "正在排版…";
+        try {
+          if (!window.mermaid) throw new Error("内置 Mermaid 内核未加载");
+          const source = card.querySelector(".diagram-source code").textContent;
+          let svg = await renderOne(card, source);
+          let adapted = false;
+          // Presentation-only reflow. Preserve the original source and expose
+          // an explicit control to restore its LR/RL direction.
+          if (card.querySelector(".diagram-layout").value === "auto"
+              && Number(svg.dataset.width) > availableWidth(card) * 1.3
+              && /^\s*(?:flowchart|graph)\s+(?:LR|RL)\b/m.test(source)) {
+            svg = await renderOne(card, source.replace(/^(\s*(?:flowchart|graph)\s+)(?:LR|RL)\b/m, "$1TB"));
+            adapted = true;
+          }
+          if (generation !== renderGeneration) return;
+          card.dataset.diagramStatus = "ready";
+          card.dataset.diagramTheme = dark ? "dark" : "light";
+          card.dataset.layout = adapted ? "vertical" : "original";
+          status.textContent = adapted ? "Mermaid · 纵向适配，原文不变" : "Mermaid · 原始方向";
+          fitDiagram(card);
+        } catch (error) {
+          target.replaceChildren();
+          card.dataset.diagramStatus = "error";
+          status.textContent = "图形未生成，已保留源码";
+          const message = document.createElement("p");
+          message.className = "diagram-error";
+          message.textContent = `Mermaid：${String(error.message || error).slice(0, 300)}`;
+          target.append(message);
+          card.querySelector(".diagram-source").open = true;
+        } finally {
+          target.setAttribute("aria-busy", "false");
+        }
+      }
+      if (generation === renderGeneration) {
+        document.documentElement.dataset.diagramsReady = "true";
+        document.dispatchEvent(new CustomEvent("hubradar:diagrams-ready"));
+      }
+    });
+    window.hubradarDiagramsReady = renderQueue;
+    return renderQueue;
+  }
+  all("[data-zoom]").forEach(button => button.addEventListener("click", () => {
+    const card = button.closest(".diagram-card"), svg = card.querySelector(".mermaid-target svg, .dsh-svg-target svg, svg");
+    if (!svg) return;
+    if (!svg.dataset.width) {
+      const vb = (svg.getAttribute("viewBox") || "").trim().split(/\s+/);
+      svg.dataset.width = vb[2] || "1000";
+    }
+    const delta = Number(button.dataset.zoom);
+    if (delta === 0) fitDiagram(card);
+    else sizeDiagram(svg, Math.max(.1, Math.min(3, (Number(svg.dataset.scale) || 1) + delta)));
+  }));
+  all(".diagram-layout").forEach(select => select.addEventListener("change", requestDiagramRender));
+  let resizeTimer, previousWidth = window.innerWidth;
+  window.addEventListener("resize", () => {
+    if (window.innerWidth === previousWidth) return;
+    previousWidth = window.innerWidth;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(requestDiagramRender, 150);
+  });
+  requestDiagramRender();
+  const progress = () => {
+    const length = document.documentElement.scrollHeight - window.innerHeight;
+    document.querySelector(".reading-progress").style.width = `${length > 0 ? window.scrollY / length * 100 : 0}%`;
+  };
+  window.addEventListener("scroll", progress, { passive: true }); progress();
+})();
+</script></body></html>

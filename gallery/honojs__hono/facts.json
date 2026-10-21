@@ -1,0 +1,453 @@
+{
+ "repo": "honojs/hono",
+ "sha": "5ca49b0720755c585c9a9835f0a479ceea36fb52",
+ "entries": [
+  "src/index.ts"
+ ],
+ "families": [
+  "src/adapter",
+  "src/helper",
+  "src/middleware"
+ ],
+ "core_paths": [
+  "src/context.ts",
+  "src/hono.ts",
+  "src/request.ts",
+  "src/router.ts",
+  "src/utils/url.ts",
+  "src/hono-base.ts"
+ ],
+ "timings": {
+  "census_s": 0.14,
+  "graph_s": 3.7,
+  "churn_s": 0.05,
+  "signals_s": 5.92,
+  "pack_s": 5.96,
+  "total_s": 9.89
+ },
+ "tokens": {
+  "evidence_total": 23075,
+  "by_section": {
+   "facts": 61,
+   "tree": 202,
+   "core": 11353,
+   "skeleton": 7947,
+   "entry": 5,
+   "tests": 1993,
+   "docs": 1011,
+   "signals": 207,
+   "patterns": 156
+  },
+  "source_full_estimate": 236440
+ },
+ "coverage": {
+  "grade": "full_scan",
+  "src_files": 232,
+  "test_files": 153
+ },
+ "signal_index": {
+  "issues": [
+   1844,
+   2719,
+   2970,
+   3293,
+   717,
+   1176,
+   3309,
+   2439,
+   3655,
+   4151
+  ],
+  "releases": []
+ },
+ "ranking_top30": [
+  {
+   "path": "src/index.ts",
+   "score": 0.6635,
+   "pagerank": 1.0,
+   "reach": 1.0,
+   "fan_in": 3,
+   "churn_1y": 2,
+   "test_refs": 7,
+   "doc_ref": 1,
+   "loc": 50,
+   "tags": [
+    "barrel"
+   ]
+  },
+  {
+   "path": "src/context.ts",
+   "score": 0.5556,
+   "pagerank": 0.367,
+   "reach": 0.5,
+   "fan_in": 41,
+   "churn_1y": 14,
+   "test_refs": 29,
+   "doc_ref": 0,
+   "loc": 742,
+   "tags": []
+  },
+  {
+   "path": "src/types.ts",
+   "score": 0.5365,
+   "pagerank": 0.375,
+   "reach": 0.5,
+   "fan_in": 54,
+   "churn_1y": 13,
+   "test_refs": 9,
+   "doc_ref": 0,
+   "loc": 2660,
+   "tags": [
+    "types-only"
+   ]
+  },
+  {
+   "path": "src/hono.ts",
+   "score": 0.4574,
+   "pagerank": 0.292,
+   "reach": 0.5,
+   "fan_in": 17,
+   "churn_1y": 1,
+   "test_refs": 48,
+   "doc_ref": 1,
+   "loc": 33,
+   "tags": []
+  },
+  {
+   "path": "src/request.ts",
+   "score": 0.3743,
+   "pagerank": 0.225,
+   "reach": 0.5,
+   "fan_in": 4,
+   "churn_1y": 14,
+   "test_refs": 2,
+   "doc_ref": 0,
+   "loc": 482,
+   "tags": []
+  },
+  {
+   "path": "src/router.ts",
+   "score": 0.3528,
+   "pagerank": 0.196,
+   "reach": 0.33,
+   "fan_in": 15,
+   "churn_1y": 1,
+   "test_refs": 7,
+   "doc_ref": 1,
+   "loc": 97,
+   "tags": []
+  },
+  {
+   "path": "src/utils/types.ts",
+   "score": 0.329,
+   "pagerank": 0.181,
+   "reach": 0.33,
+   "fan_in": 9,
+   "churn_1y": 4,
+   "test_refs": 7,
+   "doc_ref": 0,
+   "loc": 104,
+   "tags": [
+    "types-only"
+   ]
+  },
+  {
+   "path": "src/utils/url.ts",
+   "score": 0.3213,
+   "pagerank": 0.092,
+   "reach": 0.33,
+   "fan_in": 9,
+   "churn_1y": 9,
+   "test_refs": 3,
+   "doc_ref": 0,
+   "loc": 292,
+   "tags": []
+  },
+  {
+   "path": "src/client/types.ts",
+   "score": 0.3003,
+   "pagerank": 0.076,
+   "reach": 0.33,
+   "fan_in": 4,
+   "churn_1y": 11,
+   "test_refs": 3,
+   "doc_ref": 0,
+   "loc": 357,
+   "tags": [
+    "types-only"
+   ]
+  },
+  {
+   "path": "src/hono-base.ts",
+   "score": 0.2964,
+   "pagerank": 0.126,
+   "reach": 0.33,
+   "fan_in": 6,
+   "churn_1y": 12,
+   "test_refs": 0,
+   "doc_ref": 0,
+   "loc": 525,
+   "tags": []
+  },
+  {
+   "path": "src/utils/cookie.ts",
+   "score": 0.2658,
+   "pagerank": 0.018,
+   "reach": 0.25,
+   "fan_in": 4,
+   "churn_1y": 10,
+   "test_refs": 3,
+   "doc_ref": 0,
+   "loc": 237,
+   "tags": []
+  },
+  {
+   "path": "src/client/client.ts",
+   "score": 0.2593,
+   "pagerank": 0.051,
+   "reach": 0.33,
+   "fan_in": 1,
+   "churn_1y": 13,
+   "test_refs": 2,
+   "doc_ref": 0,
+   "loc": 226,
+   "tags": []
+  },
+  {
+   "path": "src/utils/body.ts",
+   "score": 0.2422,
+   "pagerank": 0.03,
+   "reach": 0.33,
+   "fan_in": 3,
+   "churn_1y": 6,
+   "test_refs": 2,
+   "doc_ref": 0,
+   "loc": 238,
+   "tags": []
+  },
+  {
+   "path": "src/router/reg-exp-router/router.ts",
+   "score": 0.2414,
+   "pagerank": 0.033,
+   "reach": 0.25,
+   "fan_in": 2,
+   "churn_1y": 4,
+   "test_refs": 1,
+   "doc_ref": 1,
+   "loc": 151,
+   "tags": []
+  },
+  {
+   "path": "src/utils/html.ts",
+   "score": 0.2355,
+   "pagerank": 0.086,
+   "reach": 0.33,
+   "fan_in": 12,
+   "churn_1y": 0,
+   "test_refs": 11,
+   "doc_ref": 0,
+   "loc": 159,
+   "tags": []
+  },
+  {
+   "path": "src/utils/http-status.ts",
+   "score": 0.2254,
+   "pagerank": 0.173,
+   "reach": 0.33,
+   "fan_in": 8,
+   "churn_1y": 0,
+   "test_refs": 4,
+   "doc_ref": 0,
+   "loc": 67,
+   "tags": [
+    "types-only"
+   ]
+  },
+  {
+   "path": "src/client/utils.ts",
+   "score": 0.2224,
+   "pagerank": 0.058,
+   "reach": 0.33,
+   "fan_in": 3,
+   "churn_1y": 4,
+   "test_refs": 1,
+   "doc_ref": 0,
+   "loc": 103,
+   "tags": []
+  },
+  {
+   "path": "src/http-exception.ts",
+   "score": 0.2154,
+   "pagerank": 0.043,
+   "reach": 0.33,
+   "fan_in": 12,
+   "churn_1y": 0,
+   "test_refs": 8,
+   "doc_ref": 0,
+   "loc": 73,
+   "tags": []
+  },
+  {
+   "path": "src/utils/headers.ts",
+   "score": 0.2105,
+   "pagerank": 0.13,
+   "reach": 0.33,
+   "fan_in": 5,
+   "churn_1y": 1,
+   "test_refs": 1,
+   "doc_ref": 0,
+   "loc": 350,
+   "tags": [
+    "types-only"
+   ]
+  },
+  {
+   "path": "src/compose.ts",
+   "score": 0.2023,
+   "pagerank": 0.02,
+   "reach": 0.25,
+   "fan_in": 2,
+   "churn_1y": 0,
+   "test_refs": 1,
+   "doc_ref": 0,
+   "loc": 66,
+   "tags": [
+    "kernel-pattern"
+   ]
+  },
+  {
+   "path": "src/utils/mime.ts",
+   "score": 0.2008,
+   "pagerank": 0.049,
+   "reach": 0.33,
+   "fan_in": 4,
+   "churn_1y": 2,
+   "test_refs": 1,
+   "doc_ref": 0,
+   "loc": 88,
+   "tags": []
+  },
+  {
+   "path": "src/router/trie-router/node.ts",
+   "score": 0.1898,
+   "pagerank": 0.02,
+   "reach": 0.2,
+   "fan_in": 1,
+   "churn_1y": 7,
+   "test_refs": 1,
+   "doc_ref": 0,
+   "loc": 191,
+   "tags": []
+  },
+  {
+   "path": "src/jsx/base.ts",
+   "score": 0.1823,
+   "pagerank": 0.034,
+   "reach": 0.0,
+   "fan_in": 17,
+   "churn_1y": 12,
+   "test_refs": 2,
+   "doc_ref": 0,
+   "loc": 445,
+   "tags": [
+    "unreachable-from-entry"
+   ]
+  },
+  {
+   "path": "src/utils/buffer.ts",
+   "score": 0.1796,
+   "pagerank": 0.019,
+   "reach": 0.25,
+   "fan_in": 4,
+   "churn_1y": 2,
+   "test_refs": 1,
+   "doc_ref": 0,
+   "loc": 98,
+   "tags": []
+  },
+  {
+   "path": "src/router/reg-exp-router/node.ts",
+   "score": 0.1583,
+   "pagerank": 0.007,
+   "reach": 0.2,
+   "fan_in": 2,
+   "churn_1y": 4,
+   "test_refs": 0,
+   "doc_ref": 0,
+   "loc": 152,
+   "tags": []
+  },
+  {
+   "path": "src/router/smart-router/router.ts",
+   "score": 0.1447,
+   "pagerank": 0.045,
+   "reach": 0.25,
+   "fan_in": 1,
+   "churn_1y": 0,
+   "test_refs": 1,
+   "doc_ref": 1,
+   "loc": 57,
+   "tags": []
+  },
+  {
+   "path": "src/jsx/dom/render.ts",
+   "score": 0.1388,
+   "pagerank": 0.011,
+   "reach": 0.0,
+   "fan_in": 6,
+   "churn_1y": 10,
+   "test_refs": 3,
+   "doc_ref": 0,
+   "loc": 814,
+   "tags": [
+    "unreachable-from-entry"
+   ]
+  },
+  {
+   "path": "src/router/reg-exp-router/trie.ts",
+   "score": 0.1307,
+   "pagerank": 0.005,
+   "reach": 0.2,
+   "fan_in": 1,
+   "churn_1y": 3,
+   "test_refs": 0,
+   "doc_ref": 0,
+   "loc": 72,
+   "tags": []
+  },
+  {
+   "path": "src/utils/jwt/jwt.ts",
+   "score": 0.124,
+   "pagerank": 0.002,
+   "reach": 0.0,
+   "fan_in": 3,
+   "churn_1y": 12,
+   "test_refs": 3,
+   "doc_ref": 0,
+   "loc": 259,
+   "tags": [
+    "unreachable-from-entry"
+   ]
+  },
+  {
+   "path": "src/jsx/hooks/index.ts",
+   "score": 0.1184,
+   "pagerank": 0.018,
+   "reach": 0.0,
+   "fan_in": 7,
+   "churn_1y": 4,
+   "test_refs": 6,
+   "doc_ref": 0,
+   "loc": 383,
+   "tags": [
+    "unreachable-from-entry"
+   ]
+  }
+ ],
+ "pattern_hits": {
+  "switch-dispatch": 5,
+  "registry-map": 2,
+  "middleware-next": 36,
+  "compose-call": 3
+ }
+}
