@@ -18,10 +18,12 @@ ADAPTER_RE = re.compile(r"(^|/)(adapters?|platforms?|integrations?|compat|shims?
 DEF_KINDS = {
     "typescript": ["class_declaration", "abstract_class_declaration", "function_declaration", "interface_declaration",
                    "type_alias_declaration", "enum_declaration", "lexical_declaration"],
+    "tsx": ["class_declaration", "abstract_class_declaration", "function_declaration", "interface_declaration",
+            "type_alias_declaration", "enum_declaration", "lexical_declaration"],
+    "javascript": ["class_declaration", "function_declaration", "lexical_declaration"],
     "python": ["class_definition", "function_definition"],
     "go": ["function_declaration", "method_declaration", "type_declaration"],
 }
-DEF_KINDS["tsx"] = DEF_KINDS["javascript"] = DEF_KINDS["typescript"]
 PATTERNS = {  # name -> (languages, ast-grep pattern)
     "middleware-next": (("typescript", "tsx", "javascript"), "await next()"),
     "compose-call": (("typescript", "tsx", "javascript"), "compose($$$)"),

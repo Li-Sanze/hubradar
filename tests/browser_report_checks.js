@@ -22,7 +22,9 @@
     if (options.kind === "extended") check("extended_diagrams", cards.length === 3 && cards.every(card => card.querySelector("svg")));
     const measure = theme => {
       const values = cards.filter(card => card.dataset.diagramStatus === "ready").map(card => {
-        const svg = card.querySelector(".mermaid-target svg"), bounds = rect(svg), scroll = card.querySelector(".diagram-scroll");
+        const svg = card.querySelector(".mermaid-target svg, .dsh-svg-target svg");
+        if (!svg) return null;
+        const bounds = rect(svg), scroll = card.querySelector(".diagram-scroll");
         const labels = all("text, foreignObject", svg).filter(el => rect(el).width > 0 && rect(el).height > 0);
         const shapes = all("g.node", svg).map(rect);
         const edgeLabels = all("g.edgeLabel", svg).filter(el => all("text", el).some(text => rect(text).width > 0));

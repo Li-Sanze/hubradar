@@ -79,13 +79,13 @@
   <title>Hono 核心系统架构与全景分层 (5ca49b07)</title>
   <desc>Web 标准接入 · SmartRouter 预编译路由决策 · 单处理器特化与洋葱中间件</desc>
   <defs>
-    <marker id="arrow-blue-hono" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <marker id="arrow-blue-hono" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
       <polygon points="0 0, 8 3, 0 6" fill="#2563eb"/>
     </marker>
-    <marker id="arrow-gray-hono" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <marker id="arrow-gray-hono" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
       <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>
     </marker>
-    <marker id="arrow-emerald-hono" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <marker id="arrow-emerald-hono" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
       <polygon points="0 0, 8 3, 0 6" fill="#059669"/>
     </marker>
     <filter id="card-shadow-hono" x="-3%" y="-3%" width="106%" height="106%">
@@ -222,13 +222,13 @@
       <text x="20" y="114" class="card-desc" fill="#5b21b6">严格维护 context.finalized 状态机 · 错误冒泡守卫</text>
     </g>
   </a>
-  <line x1="195" y1="175" x2="195" y2="215" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hono)" stroke-dasharray="3 3"/>
-  <line x1="500" y1="175" x2="500" y2="215" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hono)" stroke-dasharray="3 3"/>
-  <line x1="805" y1="175" x2="805" y2="215" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hono)" stroke-dasharray="3 3"/>
-  <line x1="330" y1="305" x2="365" y2="305" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue-hono)"/>
-  <line x1="635" y1="305" x2="670" y2="305" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue-hono)"/>
-  <polyline points="805,360 805,395 270,395 270,460" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hono)"/>
-  <polyline points="805,395 725,395 725,460" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hono)"/>
+  <line x1="195" y1="178" x2="195" y2="208" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hono)" stroke-dasharray="3 3"/>
+  <line x1="500" y1="178" x2="500" y2="208" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hono)" stroke-dasharray="3 3"/>
+  <line x1="805" y1="178" x2="805" y2="208" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hono)" stroke-dasharray="3 3"/>
+  <line x1="334" y1="305" x2="358" y2="305" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue-hono)"/>
+  <line x1="639" y1="305" x2="663" y2="305" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue-hono)"/>
+  <polyline points="805,360 805,395 270,395 270,418" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hono)"/>
+  <polyline points="805,395 725,395 725,418" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hono)"/>
   <!-- 底部图例 -->
   <circle cx="60" cy="645" r="5" fill="#2563eb"/>
   <text x="72" y="649" class="legend-text">Web 接入层 (Presentation)</text>
@@ -4202,8 +4202,14 @@ globalThis["mermaid"] = globalThis.__esbuild_esm_mermaid_nm["mermaid"].default;
     svg.style.height = "auto";
   }
   function fitDiagram(card) {
-    const svg = card.querySelector(".mermaid-target svg");
-    if (svg) sizeDiagram(svg, Math.min(1, availableWidth(card) / Number(svg.dataset.width)));
+    const svg = card.querySelector(".mermaid-target svg, .dsh-svg-target svg, svg");
+    if (svg) {
+      if (!svg.dataset.width) {
+        const vb = (svg.getAttribute("viewBox") || "").trim().split(/\s+/);
+        svg.dataset.width = vb[2] || String(svg.getAttribute("width")) || "1000";
+      }
+      sizeDiagram(svg, Math.min(1, availableWidth(card) / Number(svg.dataset.width)));
+    }
   }
   function includeRenderedBounds(svg) {
     // Mermaid owns all layout. Expand only its viewport, using measured SVG

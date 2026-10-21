@@ -65,9 +65,21 @@ def main(argv=None):
                 from .html_report import render_file
                 render_file(args.out / "radar.md", args.out / "index.html")
         elif args.command == "arch":
-            from .dsh_architecture import build_hono_architecture_spec, generate_dsh_svg
+            from .dsh_architecture import (
+                build_hono_architecture_spec,
+                build_hubradar_architecture_spec,
+                generate_dsh_svg,
+            )
             if args.spec:
-                spec_data = json.loads(args.spec.read_text(encoding="utf-8"))
+                spec_str = str(args.spec).strip()
+                if spec_str.lower() == "hubradar":
+                    spec_data = build_hubradar_architecture_spec()
+                elif spec_str.lower() == "hono":
+                    spec_data = build_hono_architecture_spec()
+                elif Path(args.spec).exists():
+                    spec_data = json.loads(Path(args.spec).read_text(encoding="utf-8"))
+                else:
+                    spec_data = build_hubradar_architecture_spec()
             else:
                 spec_data = build_hono_architecture_spec()
             svg_content = generate_dsh_svg(spec_data)

@@ -1,0 +1,32 @@
+{
+  "name": "hubradar",
+  "version": "0.1.0",
+  "description": "Discover breakout repos, distill core architectures, and stop reinventing wheels.",
+  "main": "bin/hubradar.js",
+  "bin": {
+    "hubradar": "bin/hubradar.js"
+  },
+  "scripts": {
+    "test": "node bin/hubradar.js --version"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Li-Sanze/hubradar.git"
+  },
+  "keywords": [
+    "github",
+    "tech-radar",
+    "architecture",
+    "code-distillation",
+    "agent-skill"
+  ],
+  "author": "Li-Sanze",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "bugs": {
+    "url": "https://github.com/Li-Sanze/hubradar/issues"
+  },
+  "homepage": "https://github.com/Li-Sanze/hubradar#readme"
+}

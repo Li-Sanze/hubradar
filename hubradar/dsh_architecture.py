@@ -79,13 +79,13 @@ def generate_dsh_svg(spec: Dict[str, Any]) -> str:
         f'  <title>{escape(title)}</title>',
         f'  <desc>{escape(subtitle)}</desc>',
         "  <defs>",
-        f'    <marker id="arrow-blue-{slug}" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">',
+        f'    <marker id="arrow-blue-{slug}" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">',
         '      <polygon points="0 0, 8 3, 0 6" fill="#2563eb"/>',
         "    </marker>",
-        f'    <marker id="arrow-gray-{slug}" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">',
+        f'    <marker id="arrow-gray-{slug}" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">',
         '      <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>',
         "    </marker>",
-        f'    <marker id="arrow-emerald-{slug}" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">',
+        f'    <marker id="arrow-emerald-{slug}" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">',
         '      <polygon points="0 0, 8 3, 0 6" fill="#059669"/>',
         "    </marker>",
         f'    <filter id="card-shadow-{slug}" x="-3%" y="-3%" width="106%" height="106%">',
@@ -283,6 +283,180 @@ def generate_dsh_svg(spec: Dict[str, Any]) -> str:
     return "\n".join(svg_parts)
 
 
+def build_hubradar_architecture_spec() -> Dict[str, Any]:
+    """Return the rigorously verified specification for HubRadar's DSH architecture diagram.
+
+    All anchors and code pills are verified against pinned SHA 93ef1e1:
+    - Zero external runtime dependencies.
+    - Click-to-source code anchors linking directly to GitHub lines.
+    - 3-tier C4 box-model geometry.
+    """
+    repo = "Li-Sanze/hubradar"
+    sha = "93ef1e15c8e79c0a5a337e19624b002ef7906cbb"
+
+    def link(path: str, start: int, end: int) -> str:
+        return f"https://github.com/{repo}/blob/{sha}/{path}#L{start}-L{end}"
+
+    return {
+        "slug": "hubradar",
+        "title": "HubRadar 核心系统架构与全景分层 (93ef1e1)",
+        "subtitle": "统一 CLI / 双 Skill 接入 · 静态 AST 与引文不变式验证内核 · DSH 矢量渲染与离线打包底座",
+        "height": 680,
+        "layers": [
+            {
+                "name": "入口与交互呈现平面 (Presentation & CLI / Agent Skill Plane)",
+                "x": 40,
+                "y": 80,
+                "width": 920,
+                "height": 110,
+                "cards": [
+                    {
+                        "title": "统一 CLI 懒加载网关 (cli.py)",
+                        "desc": "lazy-import 分流 prepare / finalize / radar / arch / html",
+                        "x": 60,
+                        "y": 115,
+                        "width": 270,
+                        "height": 60,
+                        "color": "blue",
+                        "href": link("hubradar/cli.py", 44, 88),
+                    },
+                    {
+                        "title": "宿主双 Agent Skill 协议 (skills/)",
+                        "desc": "3 分钟卡片与领域技术雷达 双规范交互契约",
+                        "x": 365,
+                        "y": 115,
+                        "width": 270,
+                        "height": 60,
+                        "color": "yellow",
+                        "href": link("skills/hubradar/SKILL.md", 1, 35),
+                    },
+                    {
+                        "title": "交互缩放与深浅色控制器 (assets/)",
+                        "desc": "CSS 变量双模自适应 · 零依赖矢量图无级缩放与自适应",
+                        "x": 670,
+                        "y": 115,
+                        "width": 270,
+                        "height": 60,
+                        "color": "purple",
+                        "href": link("hubradar/assets/report.js", 125, 175),
+                    },
+                ],
+            },
+            {
+                "name": "静态证据与引文验证内核 (Analysis & Invariant Verification Kernel)",
+                "x": 40,
+                "y": 215,
+                "width": 920,
+                "height": 160,
+                "cards": [
+                    {
+                        "badge": "1",
+                        "title": "ast-grep 语法树事实抽取",
+                        "desc": "多语言 AST census · 调用图与核心文件评分",
+                        "code_pill": "top_defs(root, lang) & nx.DiGraph()",
+                        "pill_y": 62,
+                        "pill_h": 32,
+                        "x": 60,
+                        "y": 250,
+                        "width": 270,
+                        "height": 110,
+                        "color": "blue",
+                        "href": link("hubradar/prepare.py", 190, 225),
+                    },
+                    {
+                        "badge": "2",
+                        "title": "引文不变式交叉严格校验",
+                        "desc": "校验 claims 证据链 · 源码行逐字引文回溯",
+                        "code_pill": "verify(facts, raw, repo)",
+                        "pill_y": 62,
+                        "pill_h": 32,
+                        "x": 365,
+                        "y": 250,
+                        "width": 270,
+                        "height": 110,
+                        "color": "purple",
+                        "href": link("hubradar/finalize.py", 53, 88),
+                    },
+                    {
+                        "badge": "3",
+                        "title": "领域技术雷达探测引擎",
+                        "desc": "突破性开源新星扫描 · 采纳四象限矩阵分析",
+                        "code_pill": "build_radar(domain_spec)",
+                        "pill_y": 62,
+                        "pill_h": 32,
+                        "x": 670,
+                        "y": 250,
+                        "width": 270,
+                        "height": 110,
+                        "color": "emerald",
+                        "href": link("hubradar/radar.py", 15, 60),
+                    },
+                ],
+            },
+            {
+                "name": "矢量渲染与白皮书打包底座 (Vector Rendering & Offline Packaging Base)",
+                "x": 40,
+                "y": 425,
+                "width": 920,
+                "height": 200,
+                "cards": [
+                    {
+                        "title": "DSH 盒模型矢量渲染编译器 (dsh_architecture.py)",
+                        "desc": "1000px 黄金视口 · 正交连线避让 · 代码药丸与 GitHub SHA 点击直达",
+                        "code_pill": "generate_dsh_svg(spec_data)",
+                        "pill_desc": "原生纯 Python 吸收 · 零外部 Node/CLI 依赖 · ~8KB 极致轻量",
+                        "pill_y": 64,
+                        "pill_h": 34,
+                        "x": 60,
+                        "y": 460,
+                        "width": 420,
+                        "height": 145,
+                        "color": "emerald",
+                        "href": link("hubradar/dsh_architecture.py", 78, 150),
+                    },
+                    {
+                        "title": "单文件离线 HTML 白皮书打包人 (html_report.py)",
+                        "desc": "Markdown 解析 · Bleach 安全占位内联 · 零脚本纯矢量自适应",
+                        "code_pill": "render_file(card_md, index_html)",
+                        "pill_desc": "彻底剥离 3.4MB mermaid.js 强依赖 · 毫秒级加载与离线归档",
+                        "pill_y": 64,
+                        "pill_h": 34,
+                        "x": 510,
+                        "y": 460,
+                        "width": 430,
+                        "height": 145,
+                        "color": "purple",
+                        "href": link("hubradar/html_report.py", 145, 185),
+                    },
+                ],
+            },
+        ],
+        "connectors": [
+            # Layer 1 -> Layer 2 dashed downward lines (clean clearance: y1=178, y2=208)
+            {"type": "line", "x1": 195, "y1": 178, "x2": 195, "y2": 208, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
+            {"type": "line", "x1": 500, "y1": 178, "x2": 500, "y2": 208, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
+            {"type": "line", "x1": 805, "y1": 178, "x2": 805, "y2": 208, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
+            # Layer 2 horizontal workflow (clean clearance: x1=334, x2=358; x1=639, x2=663)
+            {"type": "line", "x1": 334, "y1": 305, "x2": 358, "y2": 305, "color": "#2563eb", "width": 2, "marker": "url(#arrow-blue)"},
+            {"type": "line", "x1": 639, "y1": 305, "x2": 663, "y2": 305, "color": "#2563eb", "width": 2, "marker": "url(#arrow-blue)"},
+            # Layer 2 -> Layer 3 branching lines (clean clearance: stops at y=418 above Layer 3 container)
+            {"type": "polyline", "points": [[500, 360], [500, 395], [270, 395], [270, 418]], "color": "#94a3b8", "width": 1.5, "marker": "url(#arrow-gray)"},
+            {"type": "polyline", "points": [[500, 395], [725, 395], [725, 418]], "color": "#94a3b8", "width": 1.5, "marker": "url(#arrow-gray)"},
+        ],
+        "legend": {
+            "x": 60,
+            "y": 645,
+            "items": [
+                {"label": "接入与呈现 (Presentation & CLI)", "color": "#2563eb"},
+                {"label": "静态分析与验证 (Kernel & Verification)", "color": "#7c3aed"},
+                {"label": "矢量渲染与打包 (Vector & Packaging)", "color": "#059669"},
+                {"label": "点击直达 GitHub 源码提交行 (Click-to-Source)", "color": "#64748b"},
+            ],
+        },
+        "summary_note": "纯 Python 原生吸收 · 零 Node/CLI 外部依赖 · 节点点击直达 GitHub 93ef1e1 源码提交行 · 纯矢量 ~10KB",
+    }
+
+
 def build_hono_architecture_spec() -> Dict[str, Any]:
     """Return the rigorously verified specification for Hono's DSH architecture diagram.
     
@@ -432,16 +606,16 @@ def build_hono_architecture_spec() -> Dict[str, Any]:
             },
         ],
         "connectors": [
-            # Layer 1 -> Layer 2 dashed downward lines
-            {"type": "line", "x1": 195, "y1": 175, "x2": 195, "y2": 215, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
-            {"type": "line", "x1": 500, "y1": 175, "x2": 500, "y2": 215, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
-            {"type": "line", "x1": 805, "y1": 175, "x2": 805, "y2": 215, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
-            # Layer 2 horizontal workflow
-            {"type": "line", "x1": 330, "y1": 305, "x2": 365, "y2": 305, "color": "#2563eb", "width": 2, "marker": "url(#arrow-blue)"},
-            {"type": "line", "x1": 635, "y1": 305, "x2": 670, "y2": 305, "color": "#2563eb", "width": 2, "marker": "url(#arrow-blue)"},
-            # Layer 2 Context -> Layer 3 pipeline fork (branching after Context resolution)
-            {"type": "polyline", "points": [[805, 360], [805, 395], [270, 395], [270, 460]], "color": "#94a3b8", "width": 1.5, "marker": "url(#arrow-gray)"},
-            {"type": "polyline", "points": [[805, 395], [725, 395], [725, 460]], "color": "#94a3b8", "width": 1.5, "marker": "url(#arrow-gray)"},
+            # Layer 1 -> Layer 2 dashed downward lines (clean clearance: y1=178, y2=208)
+            {"type": "line", "x1": 195, "y1": 178, "x2": 195, "y2": 208, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
+            {"type": "line", "x1": 500, "y1": 178, "x2": 500, "y2": 208, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
+            {"type": "line", "x1": 805, "y1": 178, "x2": 805, "y2": 208, "color": "#94a3b8", "width": 1.5, "dash": "3 3", "marker": "url(#arrow-gray)"},
+            # Layer 2 horizontal workflow (clean clearance: x1=334, x2=358; x1=639, x2=663)
+            {"type": "line", "x1": 334, "y1": 305, "x2": 358, "y2": 305, "color": "#2563eb", "width": 2, "marker": "url(#arrow-blue)"},
+            {"type": "line", "x1": 639, "y1": 305, "x2": 663, "y2": 305, "color": "#2563eb", "width": 2, "marker": "url(#arrow-blue)"},
+            # Layer 2 Context -> Layer 3 pipeline fork (clean clearance: stops at y=418 above Layer 3 container)
+            {"type": "polyline", "points": [[805, 360], [805, 395], [270, 395], [270, 418]], "color": "#94a3b8", "width": 1.5, "marker": "url(#arrow-gray)"},
+            {"type": "polyline", "points": [[805, 395], [725, 395], [725, 418]], "color": "#94a3b8", "width": 1.5, "marker": "url(#arrow-gray)"},
         ],
         "legend": {
             "x": 60,

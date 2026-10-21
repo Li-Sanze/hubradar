@@ -145,8 +145,14 @@
     svg.style.height = "auto";
   }
   function fitDiagram(card) {
-    const svg = card.querySelector(".mermaid-target svg");
-    if (svg) sizeDiagram(svg, Math.min(1, availableWidth(card) / Number(svg.dataset.width)));
+    const svg = card.querySelector(".mermaid-target svg, .dsh-svg-target svg, svg");
+    if (svg) {
+      if (!svg.dataset.width) {
+        const vb = (svg.getAttribute("viewBox") || "").trim().split(/\s+/);
+        svg.dataset.width = vb[2] || String(svg.getAttribute("width")) || "1000";
+      }
+      sizeDiagram(svg, Math.min(1, availableWidth(card) / Number(svg.dataset.width)));
+    }
   }
   function includeRenderedBounds(svg) {
     // Mermaid owns all layout. Expand only its viewport, using measured SVG

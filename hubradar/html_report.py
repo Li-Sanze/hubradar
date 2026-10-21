@@ -10,7 +10,11 @@ from uuid import uuid4
 import bleach
 from markdown_it import MarkdownIt
 
-from .dsh_architecture import build_hono_architecture_spec, generate_dsh_svg
+from .dsh_architecture import (
+    build_hono_architecture_spec,
+    build_hubradar_architecture_spec,
+    generate_dsh_svg,
+)
 
 
 def render_markdown(markdown, *, title=None):
@@ -51,10 +55,13 @@ def render_markdown(markdown, *, title=None):
                 try:
                     svg_markup = generate_dsh_svg(json.loads(content))
                 except Exception:
-                    svg_markup = generate_dsh_svg(build_hono_architecture_spec())
+                    svg_markup = generate_dsh_svg(build_hubradar_architecture_spec())
             else:
-                # Default to verified Hono architecture spec if 'hono' mentioned or default
-                svg_markup = generate_dsh_svg(build_hono_architecture_spec())
+                tag = content.strip().lower()
+                if tag == "hubradar":
+                    svg_markup = generate_dsh_svg(build_hubradar_architecture_spec())
+                else:
+                    svg_markup = generate_dsh_svg(build_hono_architecture_spec())
 
             diagrams[key] = {
                 "is_mermaid": False,
