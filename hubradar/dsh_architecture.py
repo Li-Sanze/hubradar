@@ -15,10 +15,6 @@ import re
 from copy import deepcopy
 from typing import Any, Dict, Optional
 
-# Keep existing imports working; the example data lives outside the compiler.
-from .fixtures import build_hono_architecture_spec, build_hubradar_architecture_spec
-
-
 COLOR_PALETTES = {
     "blue": {
         "bg": "#f0f9ff",
@@ -94,6 +90,8 @@ def validate_href(href: Optional[str]) -> Optional[str]:
 
 def get_example_spec(name: str) -> Dict[str, Any]:
     """Load an explicitly named Benchmark, never a fallback for invalid input."""
+    from .fixtures import build_hono_architecture_spec, build_hubradar_architecture_spec
+
     builders = {"hono": build_hono_architecture_spec, "hubradar": build_hubradar_architecture_spec}
     if name not in builders:
         raise ValueError(f"Unknown DSH example: {name!r}; choose hubradar or hono")
@@ -115,24 +113,22 @@ def _number(value: Any, field: str, minimum: float = 0) -> Any:
 def compile_dsh_spec(spec: Dict[str, Any]) -> Dict[str, Any]:
     """Compile semantic layers/cards/edges without mutating the caller's spec.
 
-    Explicit geometry is authoritative. Generated rows use 840/410/270px
-    cards, a 20px gap and their tallest card's height. Gutter lanes follow
-    input edge order; the same input always produces the same geometry.
-    Semantic edges are consumed into connectors, so compilation is idempotent.
+    Supports 1–4 layers of 1–4 cards; four wrap to 2×2. Explicit geometry is preserved.
+    Edge order fixes routing. Edges become connectors, keeping compilation idempotent.
     """
     if not isinstance(spec, dict):
         raise ValueError("DSH spec must be a JSON object")
     result = deepcopy(spec)
     layers = result.get("layers")
-    if not isinstance(layers, list) or not layers:
-        raise ValueError("DSH spec requires a non-empty layers array")
+    if not isinstance(layers, list) or not 1 <= len(layers) <= 4:
+        raise ValueError("DSH spec requires 1–4 layers")
     edges = result.get("edges", [])
     if not isinstance(edges, list):
         raise ValueError("edges must be an array")
     owners, layer_ids = {}, set()
     for li, layer in enumerate(layers):
-        if not isinstance(layer, dict) or not isinstance(layer.get("cards"), list):
-            raise ValueError("Each layer must be an object with a cards array")
+        if not isinstance(layer, dict) or not isinstance(layer.get("cards"), list) or not 1 <= len(layer["cards"]) <= 4:
+            raise ValueError("Each layer requires 1–4 cards")
         layer_id = layer.setdefault("id", f"layer-{li}")
         if not isinstance(layer_id, str) or not layer_id or layer_id in layer_ids:
             raise ValueError(f"Invalid or duplicate layer id: {layer_id!r}")
@@ -168,13 +164,12 @@ def compile_dsh_spec(spec: Dict[str, Any]) -> Dict[str, Any]:
         ly = layer["y"] = _number(layer.get("y", cursor), "layer.y")
         lw = layer["width"] = _number(layer.get("width", 920), "layer.width", 1)
         cards = layer["cards"]
-        count = len(cards)
-        columns = 1 if count <= 1 else (3 if count == 3 or count > 4 and count % 3 == 0 else 2)
+        columns = 2 if len(cards) == 4 else len(cards)
         cw = min({1: 840, 2: 410, 3: 270}[columns], (lw - 40 - 20 * (columns - 1)) / columns)
         if cw < 60 and any("width" not in card for card in cards):
             raise ValueError("Layer is too narrow for its cards")
         row_y = ly + 40
-        for start in range(0, count, columns):
+        for start in range(0, len(cards), columns):
             row = cards[start:start + columns]
             row_width = len(row) * cw + (len(row) - 1) * 20
             row_x, row_bottom = lx + (lw - row_width) / 2, row_y
@@ -241,7 +236,6 @@ def compile_dsh_spec(spec: Dict[str, Any]) -> Dict[str, Any]:
             if source["row"] == target["row"]:
                 if source["center_x"] > target["center_x"]:
                     x1, x2 = source["left"], target["right"]
-                # Unequal card heights still need an orthogonal elbow.
                 mid = (x1 + x2) / 2
                 points = [[x1, y1], [mid, y1], [mid, y2], [x2, y2]]
             else:

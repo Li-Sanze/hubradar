@@ -46,7 +46,7 @@ hubradar arch --spec architecture.json -o out/system.svg     # 语义 JSON 自�
 hubradar html out/hono/card.md                                 # 格式转换：任意 card.md / radar.md 转换为独立离线单文件 HTML
 ```
 
-DSH 仅使用 Python 标准库；调用方提供 `layers`、`cards`、`edges`，无需坐标。画布宽 1000px，高度随内容增长，四张卡片自动排成 2×2。已有显式坐标与 `connectors` 仍可使用：
+DSH 仅使用 Python 标准库；调用方提供 `layers`、`cards`、`edges`，无需坐标。支持 1–4 层、每层 1–4 卡，画布宽 1000px，高度随内容增长，四张卡片自动排成 2×2。已有显式坐标与 `connectors` 仍可使用：
 
 ```json
 {
@@ -63,7 +63,7 @@ DSH 仅使用 Python 标准库；调用方提供 `layers`、`cards`、`edges`，
 }
 ```
 
-在 Markdown 的 `dsh`、`architecture` 或 `dsh-architecture` 围栏中放入该 JSON 即可生成报告图解；`hubradar` / `hono` 标签仅加载明确标注的 Benchmark。无效 JSON、渲染异常和原始 SVG 会显示告警卡片及可展开原文，不会替换成其他项目的图。
+在 Markdown 的 `dsh`、`architecture` 或 `dsh-architecture` 围栏中直接放入该 JSON 即可生成报告图解；围栏只接受 JSON。两个 gallery 的 `card.md` 都内嵌完整语义契约，由同一编译器计算布局；修改层、卡片或边后重新运行 `hubradar html` 即可重新排版。Benchmark 通过 CLI 的 `--example` 显式选择。无效 JSON、项目名标签、渲染异常和原始 SVG 会显示告警卡片及可展开原文。
 
 ```mermaid
 flowchart LR

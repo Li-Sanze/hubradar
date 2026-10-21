@@ -59,7 +59,7 @@ def main():
     parser.add_argument("--legacy-headless", action="store_true", help="For Chromium versions supporting --headless=old")
     parser.add_argument("--width", type=int, default=1440)
     parser.add_argument("--height", type=int, default=1200)
-    parser.add_argument("--kind", choices=["hono", "radar", "extended", "invalid"], required=True)
+    parser.add_argument("--kind", choices=["hono", "hubradar", "radar", "extended", "invalid"], required=True)
     parser.add_argument("--theme", choices=["light", "dark"], default="light")
     parser.add_argument("--capture", choices=["top", "flow", "states"], default="flow")
     parser.add_argument("--out", type=Path, required=True)

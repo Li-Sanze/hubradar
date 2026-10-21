@@ -11,6 +11,8 @@
   try {
     await window.hubradarDiagramsReady;
     const cards = all(".diagram-card"), options = window.hubradarTestOptions;
+    const mermaidCards = cards.filter(card => card.querySelector(".mermaid-target"));
+    const dshCards = cards.filter(card => card.querySelector(".dsh-svg-target"));
     check("mermaid_loaded", typeof window.mermaid?.render === "function");
     if (options.kind === "invalid") {
       check("syntax_failure_visible", cards.some(card => card.dataset.diagramStatus === "error"
@@ -18,7 +20,13 @@
     } else {
       check("all_diagrams_ready", cards.every(card => card.dataset.diagramStatus === "ready"));
     }
-    if (options.kind === "hono") check("three_diagrams", cards.length === 3);
+    if (options.kind === "hono") check("dsh_and_three_mermaid_diagrams", dshCards.length === 1 && mermaidCards.length === 3);
+    if (options.kind === "hubradar") check("dsh_and_mermaid_diagrams", dshCards.length === 1 && mermaidCards.length === 1);
+    for (const card of dshCards) {
+      check("dsh_source_anchors", all("a.card-anchor", card).length === 8);
+      check("dsh_text_inside_cards", all("g[data-card-id]", card).every(group =>
+        all("text", group).every(text => inBounds(rect(text), rect(group.querySelector(".card-rect"))))));
+    }
     if (options.kind === "extended") check("extended_diagrams", cards.length === 3 && cards.every(card => card.querySelector("svg")));
     const measure = theme => {
       const values = cards.filter(card => card.dataset.diagramStatus === "ready").map(card => {
@@ -68,19 +76,20 @@
     await window.hubradarDiagramsReady;
     check("theme_light", document.documentElement.dataset.theme === "light");
     if (options.kind === "hono") {
+      const flow = mermaidCards[0];
       const compact = element => element.textContent.replace(/\s/g, "");
       check("state_self_loop_labels_complete",
-        compact(cards[1].querySelector("svg")).includes("add()→抛错")
-        && compact(cards[2].querySelector("svg")).includes("header()→克隆Response再改"));
-      check("flow_not_overwide", Number(cards[0].querySelector("svg").dataset.width) < 1200);
-      const originalSource = cards[0].querySelector(".diagram-source code").textContent;
-      const select = cards[0].querySelector(".diagram-layout");
+        compact(mermaidCards[1].querySelector("svg")).includes("add()→抛错")
+        && compact(mermaidCards[2].querySelector("svg")).includes("header()→克隆Response再改"));
+      check("flow_not_overwide", Number(flow.querySelector("svg").dataset.width) < 1200);
+      const originalSource = flow.querySelector(".diagram-source code").textContent;
+      const select = flow.querySelector(".diagram-layout");
       select.value = "original"; select.dispatchEvent(new Event("change"));
       await window.hubradarDiagramsReady;
-      check("original_direction_available", cards[0].dataset.layout === "original");
+      check("original_direction_available", flow.dataset.layout === "original");
       select.value = "auto"; select.dispatchEvent(new Event("change"));
       await window.hubradarDiagramsReady;
-      check("source_unchanged", cards[0].querySelector(".diagram-source code").textContent === originalSource);
+      check("source_unchanged", flow.querySelector(".diagram-source code").textContent === originalSource);
     }
     const svg = document.querySelector(".mermaid-target svg, .dsh-svg-target svg");
     if (svg) {

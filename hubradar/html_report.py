@@ -10,7 +10,7 @@ from uuid import uuid4
 import bleach
 from markdown_it import MarkdownIt
 
-from .dsh_architecture import generate_dsh_svg, get_example_spec
+from .dsh_architecture import generate_dsh_svg
 
 
 def render_markdown(markdown, *, title=None):
@@ -44,15 +44,11 @@ def render_markdown(markdown, *, title=None):
 
         if lang in ("dsh", "architecture", "dsh-architecture"):
             key = f"HUBRADARDSH{uuid4().hex}"
-            content = token.content.strip()
-            tag = content.lower()
             try:
-                spec = get_example_spec(tag) if tag in ("hubradar", "hono") else json.loads(content)
-                svg_markup = generate_dsh_svg(spec)
-                label = f"DSH Benchmark 样例 · {tag}" if tag in ("hubradar", "hono") else "DSH 盒模型 · 架构全景 (可点击代码锚点)"
+                svg_markup = generate_dsh_svg(json.loads(token.content))
                 markup = (
                     '<div class="diagram-card dsh-architecture" data-diagram-status="ready">'
-                    f'<div class="diagram-bar"><span class="diagram-status" role="status">{label}</span>'
+                    '<div class="diagram-bar"><span class="diagram-status" role="status">DSH 盒模型 · 架构全景 (可点击代码锚点)</span>'
                     '<div class="diagram-controls">'
                     '<button type="button" data-zoom="-0.2" aria-label="缩小图形">−</button>'
                     '<button type="button" data-zoom="0" aria-label="适应容器">适应</button>'

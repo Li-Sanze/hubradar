@@ -14,6 +14,7 @@ from unittest.mock import patch
 from hubradar import finalize, prepare, radar
 from hubradar.cli import main
 from hubradar.dsh_architecture import compile_dsh_spec, generate_dsh_svg, get_example_spec
+from hubradar.fixtures import build_hono_architecture_spec, build_hubradar_architecture_spec
 from hubradar.html_report import render_file, render_markdown
 
 
@@ -156,29 +157,38 @@ class ArchitectureTests(unittest.TestCase):
                     self.assertFalse(crosses, f"Edge {edge} crosses {cid}")
 
     def test_semantic_layout_is_deterministic_bounded_and_non_overlapping(self):
-        for count in (1, 2, 3, 4, 5, 6, 7, 9, 10, 20):
-            with self.subTest(count=count):
-                spec = self.spec(count)
-                original = copy.deepcopy(spec)
-                compiled = compile_dsh_spec(spec)
-                self.assertEqual(spec, original)
-                self.assertEqual(generate_dsh_svg(spec), generate_dsh_svg(spec))
-                boxes = list(compiled["card_index"].values())
-                self.assert_disjoint(boxes)
-                layer = compiled["layers"][0]
-                svg = ET.fromstring(generate_dsh_svg(spec))
-                self.assertEqual(svg.get("viewBox"), f'0 0 1000 {compiled["height"]}')
-                self.assertEqual(len(svg.findall('.//s:g[@data-card-id]', self.NS)), count)
-                for card in boxes:
-                    self.assertGreaterEqual(card["left"], 60)
-                    self.assertLessEqual(card["right"], 940)
-                    self.assertGreaterEqual(card["top"], layer["y"] + 35)
-                    self.assertLessEqual(card["bottom"], layer["y"] + layer["height"])
-                    self.assertLess(card["bottom"], compiled["height"])
-                expected_width = 840 if count == 1 else 270 if count == 3 or count % 3 == 0 else 410
-                self.assertEqual(boxes[0]["w"], expected_width)
-                if count == 20:
-                    self.assertGreater(compiled["height"], 680)
+        for layer_count in range(1, 5):
+            for count in range(1, 5):
+                with self.subTest(layers=layer_count, cards=count):
+                    self.check_layout(layer_count, count)
+
+    def check_layout(self, layer_count, count):
+        spec = self.spec(count)
+        spec["layers"] = [
+            {"id": f"layer-{i}", "cards": [
+                {**card, "id": f'{card["id"]}-{i}'} for card in spec["layers"][0]["cards"]]}
+            for i in range(layer_count)
+        ]
+        original = copy.deepcopy(spec)
+        compiled = compile_dsh_spec(spec)
+        self.assertEqual(spec, original)
+        self.assertEqual(generate_dsh_svg(spec), generate_dsh_svg(spec))
+        boxes = list(compiled["card_index"].values())
+        self.assert_disjoint(boxes)
+        svg = ET.fromstring(generate_dsh_svg(spec))
+        self.assertEqual(svg.get("viewBox"), f'0 0 1000 {compiled["height"]}')
+        self.assertEqual(len(svg.findall('.//s:g[@data-card-id]', self.NS)), count * layer_count)
+        for card in boxes:
+            layer = compiled["layers"][card["layer"]]
+            self.assertGreaterEqual(card["left"], 60)
+            self.assertLessEqual(card["right"], 940)
+            self.assertGreaterEqual(card["top"], layer["y"] + 35)
+            self.assertLessEqual(card["bottom"], layer["y"] + layer["height"])
+            self.assertLess(card["bottom"], compiled["height"])
+        expected_width = 840 if count == 1 else 270 if count == 3 else 410
+        self.assertEqual(boxes[0]["w"], expected_width)
+        if layer_count == 4:
+            self.assertGreater(compiled["height"], 680)
 
     def test_four_cards_wrap_as_two_by_two(self):
         compiled = compile_dsh_spec(self.spec(4))
@@ -250,23 +260,79 @@ class ArchitectureTests(unittest.TestCase):
         ET.fromstring(generate_dsh_svg(spec))
 
     def test_legacy_geometry_connectors_and_source_anchors_are_preserved(self):
-        from hubradar.fixtures import build_hono_architecture_spec, build_hubradar_architecture_spec
+        spec = {"height": 680, "layers": [{"x": 40, "y": 80, "width": 920, "height": 200,
+                "cards": [{"x": 60, "y": 120, "width": 300, "height": 100,
+                           "href": "https://github.com/owner/repo/blob/SHA/main.py#L1"}]}],
+                "connectors": [{"type": "line", "x1": 360, "y1": 170, "x2": 400, "y2": 170}]}
+        compiled = compile_dsh_spec(spec)
+        self.assertEqual(compiled["height"], 680)
+        self.assertEqual(compiled["connectors"], spec["connectors"])
+        before, after = spec["layers"][0], compiled["layers"][0]
+        for field in ("x", "y", "width", "height"):
+            self.assertEqual(before[field], after[field])
+        for field in ("x", "y", "width", "height", "href"):
+            self.assertEqual(before["cards"][0][field], after["cards"][0][field])
+        root = ET.fromstring(generate_dsh_svg(spec))
+        self.assertEqual(len(root.findall('.//s:a', self.NS)), 1)
+
+    def test_fixtures_are_semantic_and_compile_to_clear_routes(self):
         for builder in (build_hono_architecture_spec, build_hubradar_architecture_spec):
-            spec = builder()
-            compiled = compile_dsh_spec(spec)
-            self.assertEqual(compiled["height"], 680)
-            self.assertEqual(compiled["connectors"], spec["connectors"])
-            for before, after in zip(spec["layers"], compiled["layers"]):
-                for field in ("x", "y", "width", "height"):
-                    self.assertEqual(before[field], after[field])
-                for old, new in zip(before["cards"], after["cards"]):
-                    for field in ("x", "y", "width", "height", "href"):
-                        self.assertEqual(old[field], new[field])
-            root = ET.fromstring(generate_dsh_svg(spec))
-            self.assertEqual(len(root.findall('.//s:a', self.NS)), 8)
+            with self.subTest(builder=builder.__name__):
+                spec = builder()
+                self.assert_semantic(spec)
+                self.assertTrue(spec["edges"])
+                compiled = compile_dsh_spec(spec)
+                self.assert_disjoint(list(compiled["card_index"].values()))
+                self.assert_routes_clear_cards(compiled)
+                for edge in compiled["connectors"]:
+                    self.assert_orthogonal(edge["points"])
+                root = ET.fromstring(generate_dsh_svg(spec))
+                self.assertEqual(len(root.findall('.//s:a', self.NS)), 8)
+
+    def assert_semantic(self, value):
+        if isinstance(value, dict):
+            self.assertFalse({"x", "y", "width", "height", "points", "connectors", "pill_y", "pill_h"} & value.keys())
+            for child in value.values():
+                self.assert_semantic(child)
+        elif isinstance(value, list):
+            for child in value:
+                self.assert_semantic(child)
+
+    def test_gallery_contracts_render_without_fixtures_and_reproduce_artifacts(self):
+        gallery = Path(__file__).resolve().parents[1] / "gallery"
+        for folder, name, builder in (("hubradar", "hubradar", build_hubradar_architecture_spec),
+                                      ("honojs__hono", "hono", build_hono_architecture_spec)):
+            with self.subTest(folder=folder):
+                card = (gallery / folder / "card.md").read_text(encoding="utf-8")
+                source = re.search(r"```dsh-architecture\n(.*?)\n```", card, re.S).group(1)
+                spec = json.loads(source)
+                self.assert_semantic(spec)
+                self.assertEqual(spec, builder())
+                with patch("hubradar.fixtures.build_hono_architecture_spec", side_effect=AssertionError("fixture called")), \
+                     patch("hubradar.fixtures.build_hubradar_architecture_spec", side_effect=AssertionError("fixture called")):
+                    page = render_markdown(card)
+                    svg = generate_dsh_svg(spec)
+                    self.assertIn(svg, page)
+                    self.assertNotIn('data-diagram-status="error"', page)
+                    self.assertEqual(svg, (gallery / folder / f"{name}-architecture.svg").read_text(encoding="utf-8"))
+                    self.assertEqual(page, (gallery / folder / "index.html").read_text(encoding="utf-8"))
+                    original = compile_dsh_spec(spec)
+                    spec["layers"][0]["cards"][0]["title"] = "契约修改后重新排版"
+                    spec["layers"][0]["cards"].append({"id": "extra", "title": "新卡片"})
+                    spec["edges"].append({"from": "extra", "to": spec["layers"][1]["cards"][0]["id"]})
+                    compiled = compile_dsh_spec(spec)
+                    first = spec["layers"][0]["cards"][0]["id"]
+                    self.assertNotEqual(original["card_index"][first]["w"], compiled["card_index"][first]["w"])
+                    self.assertGreater(compiled["card_index"]["extra"]["y"], compiled["card_index"][first]["y"])
+                    self.assert_routes_clear_cards(compiled)
+                    changed = render_markdown(f"```dsh-architecture\n{json.dumps(spec)}\n```\n")
+                    self.assertIn("契约修改后重新排版", changed)
+                    self.assertIn('data-card-id="extra"', changed)
+                    self.assertIn(generate_dsh_svg(spec), changed)
 
     def test_invalid_schema_and_geometry_raise_instead_of_creating_another_diagram(self):
-        invalid = [None, [], {}, {"layers": {}}, {"layers": [{"cards": {}}]}]
+        invalid = [None, [], {}, {"layers": {}}, {"layers": [{"cards": {}}]},
+                   {"layers": [{"cards": []}]}, self.spec(5), {"layers": self.spec()["layers"] * 5}]
         for field, value in (("id", "node-1"), ("height", 0), ("width", -1), ("x", float("nan"))):
             spec = self.spec()
             spec["layers"][0]["cards"][0][field] = value
@@ -417,14 +483,13 @@ print("<script>alert('not executable')</script>")
             self.assertEqual(path.read_text(), "# Card")
 
     def test_dsh_architecture_svg_generation_and_safety(self):
-        import xml.etree.ElementTree as ET
-        from hubradar.dsh_architecture import build_hono_architecture_spec, generate_dsh_svg
         spec = build_hono_architecture_spec()
+        height = compile_dsh_spec(spec)["height"]
         svg = generate_dsh_svg(spec)
         root = ET.fromstring(svg)
-        self.assertEqual(root.get("viewBox"), "0 0 1000 680")
+        self.assertEqual(root.get("viewBox"), f"0 0 1000 {height}")
         self.assertEqual(root.get("width"), "1000")
-        self.assertEqual(root.get("height"), "680")
+        self.assertEqual(root.get("height"), str(height))
         self.assertEqual(root.get("role"), "img")
         anchors = root.findall(".//{http://www.w3.org/2000/svg}a")
         self.assertEqual(len(anchors), 8)
@@ -437,7 +502,8 @@ print("<script>alert('not executable')</script>")
         self.assertNotIn("javascript:", bad_svg)
 
     def test_dsh_fence_rendering_and_bleach_bypass(self):
-        page = render_markdown("# Architecture\n\n```dsh-architecture\nhono\n```\n")
+        source = json.dumps(build_hono_architecture_spec())
+        page = render_markdown(f"# Architecture\n\n```dsh-architecture\n{source}\n```\n")
         self.assertIn('class="diagram-card dsh-architecture"', page)
         self.assertIn("<svg", page)
         self.assertIn('class="card-anchor"', page)
@@ -446,7 +512,8 @@ print("<script>alert('not executable')</script>")
         self.assertIn("viewBox=", page)
 
     def test_dsh_only_page_omits_mermaid_runtime(self):
-        page = render_markdown("# Architecture\n\n```dsh-architecture\nhono\n```\n")
+        source = json.dumps(build_hono_architecture_spec())
+        page = render_markdown(f"# Architecture\n\n```dsh-architecture\n{source}\n```\n")
         self.assertNotIn('id="hubradar-mermaid"', page)
         # Should be lightweight (< 50KB) instead of 3.6MB
         self.assertLess(len(page.encode("utf-8")), 50000)
@@ -470,19 +537,22 @@ print("<script>alert('not executable')</script>")
     def test_dsh_renderer_exception_is_escaped_and_does_not_load_a_fixture(self):
         source = json.dumps({"layers": [{"cards": [{"title": "真实系统"}]}]})
         with patch("hubradar.html_report.generate_dsh_svg", side_effect=RuntimeError('<script>bad()</script>')), \
-             patch("hubradar.html_report.get_example_spec") as fixture:
+             patch("hubradar.dsh_architecture.get_example_spec") as fixture:
             page = render_markdown(f"# 架构\n\n```dsh\n{source}\n```\n")
         fixture.assert_not_called()
         self.assertIn('data-diagram-status="error"', page)
         self.assertIn('&lt;script&gt;bad()&lt;/script&gt;', page)
         self.assertNotIn('<script>bad()', page)
 
-    def test_dsh_explicit_examples_are_labeled_as_benchmarks(self):
-        for name in ("hono", "hubradar"):
-            with self.subTest(name=name):
-                page = render_markdown(f"# 架构\n\n```architecture\n{name}\n```\n")
-                self.assertIn(f'DSH Benchmark 样例 · {name}', page)
-                self.assertIn('data-diagram-status="ready"', page)
+    def test_dsh_fences_reject_magic_example_names(self):
+        for lang in ("dsh", "architecture", "dsh-architecture"):
+            for name in ("hono", "hubradar", "Hono", '"hono"'):
+                with self.subTest(lang=lang, name=name), \
+                     patch("hubradar.dsh_architecture.get_example_spec") as fixture:
+                    page = render_markdown(f"# 架构\n\n```{lang}\n{name}\n```\n")
+                    fixture.assert_not_called()
+                    self.assertIn('data-diagram-status="error"', page)
+                    self.assertNotIn('<svg', page)
 
     def test_dsh_semantic_json_renders_its_own_system(self):
         source = json.dumps({"title": "独立应用", "layers": [{"cards": [{"id": "app", "title": "应用入口", "code_pill": "run()"}]}]})

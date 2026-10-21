@@ -21,6 +21,9 @@
 .mermaid-staging{position:absolute;left:-100000px;top:0;visibility:hidden;pointer-events:none}
 .diagram-source{border:0;border-top:1px solid var(--line);border-radius:0;margin:0;font-size:12px}.diagram-source summary{font-size:12px;color:var(--muted)}
 .diagram-error{color:var(--secondary);font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}
+.diagram-card[data-diagram-status=error]{border-color:#dc2626}
+.diagram-card[data-diagram-status=error] .diagram-status,.diagram-card[data-diagram-status=error] .diagram-error{color:#b91c1c}
+:root[data-theme=dark] .diagram-card[data-diagram-status=error] .diagram-status,:root[data-theme=dark] .diagram-card[data-diagram-status=error] .diagram-error{color:#fca5a5}
 @media print{.diagram-controls{display:none}.mermaid-target svg{max-width:100%!important;width:100%!important}.diagram-card{break-inside:avoid}}
 </style></head><body>
 <a href="#report" class="skip-link">跳到报告正文</a><div class="reading-progress" aria-hidden="true"></div>
@@ -38,7 +41,7 @@
 <p><strong>解决</strong>：告别盲目造轮子与营销刷星，3 分钟看穿任意开源代码库的真实架构、承重模式与踩坑避坑决策，输出零依赖交互白皮书。<br>
 <strong>不解决</strong>：不替代完整工程代码生成，不运行不可信的目标源码（坚持严格只读 AST 静态提取）。</p>
 <h2 id="section-1">核心系统架构全景</h2>
-<div class="diagram-card dsh-architecture" data-diagram-status="ready"><div class="diagram-bar"><span class="diagram-status" role="status">DSH 盒模型 · 架构全景 (可点击代码锚点)</span><div class="diagram-controls"><button type="button" data-zoom="-0.2" aria-label="缩小图形">−</button><button type="button" data-zoom="0" aria-label="适应容器">适应</button><button type="button" data-zoom="0.2" aria-label="放大图形">＋</button></div></div><div class="diagram-scroll" tabindex="0" aria-label="可缩放的 DSH 架构全景图"><div class="dsh-svg-target"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 680" width="1000" height="680" style="max-width:100%;height:auto;display:block;margin:0 auto;" role="img" aria-label="HubRadar 核心系统架构与全景分层 (93ef1e1)">
+<div class="diagram-card dsh-architecture" data-diagram-status="ready"><div class="diagram-bar"><span class="diagram-status" role="status">DSH 盒模型 · 架构全景 (可点击代码锚点)</span><div class="diagram-controls"><button type="button" data-zoom="-0.2" aria-label="缩小图形">−</button><button type="button" data-zoom="0" aria-label="适应容器">适应</button><button type="button" data-zoom="0.2" aria-label="放大图形">＋</button></div></div><div class="diagram-scroll" tabindex="0" aria-label="可缩放的 DSH 架构全景图"><div class="dsh-svg-target"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 722" width="1000" height="722" style="max-width:100%;height:auto;display:block;margin:0 auto;" role="img" aria-label="HubRadar 核心系统架构与全景分层 (93ef1e1)">
   <title>HubRadar 核心系统架构与全景分层 (93ef1e1)</title>
   <desc>统一 CLI / 双 Skill 接入 · 静态 AST 与引文不变式验证内核 · DSH 矢量渲染与离线打包底座</desc>
   <defs>
@@ -96,52 +99,50 @@
   </style>
 
   <!-- 背景画布 -->
-  <rect width="1000" height="680" class="canvas-bg" data-graph-role="background"/>
+  <rect width="1000" height="722" class="canvas-bg" data-graph-role="background"/>
 
   <!-- 头部标题 -->
   <text x="40" y="42" class="arch-title">HubRadar 核心系统架构与全景分层 (93ef1e1)</text>
   <text x="40" y="62" class="arch-subtitle">统一 CLI / 双 Skill 接入 · 静态 AST 与引文不变式验证内核 · DSH 矢量渲染与离线打包底座</text>
 
-  <!-- 容器分层：入口与交互呈现平面 (Presentation &amp; CLI / Agent Skill Plane) -->
-  <rect x="40" y="80" width="920" height="110" rx="10" stroke-width="1.5" class="layer-container" filter="url(#card-shadow-hubradar)" data-graph-role="container"/>
+  <rect x="40" y="80" width="920" height="125" rx="10" stroke-width="1.5" class="layer-container" filter="url(#card-shadow-hubradar)" data-graph-role="container" data-layer-id="presentation"/>
   <text x="60" y="104" class="layer-title">入口与交互呈现平面 (Presentation &amp; CLI / Agent Skill Plane)</text>
   <a class="card-anchor" href="https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/cli.py#L44-L88" target="_blank" rel="noopener">
-    <g transform="translate(60, 115)">
-      <rect width="270" height="60" rx="8" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.2" class="card-rect"/>
+    <g transform="translate(75, 120)" data-card-id="cli">
+      <rect width="270" height="65" rx="8" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.2" class="card-rect"/>
       <text x="15" y="23" class="card-title" fill="#1e40af">统一 CLI 懒加载网关 (cli.py)</text>
       <text x="14" y="42" class="card-desc">lazy-import 分流五大子命令与流水线</text>
     </g>
   </a>
   <a class="card-anchor" href="https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/skills/hubradar/SKILL.md#L1-L35" target="_blank" rel="noopener">
-    <g transform="translate(365, 115)">
-      <rect width="270" height="60" rx="8" fill="#fefce8" stroke="#facc15" stroke-width="1.2" class="card-rect"/>
-      <text x="15" y="23" class="card-title" fill="#92400e">宿主双 Agent Skill 协议 (skills/)</text>
+    <g transform="translate(365, 120)" data-card-id="skills">
+      <rect width="270" height="65" rx="8" fill="#fefce8" stroke="#facc15" stroke-width="1.2" class="card-rect"/>
+      <text x="15" y="23" class="card-title" fill="#92400e">宿主双 Agent Skill 协议 (skill…</text>
       <text x="14" y="42" class="card-desc">3 分钟卡片与技术雷达 双规范交互契约</text>
     </g>
   </a>
   <a class="card-anchor" href="https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/assets/report.js#L125-L175" target="_blank" rel="noopener">
-    <g transform="translate(670, 115)">
-      <rect width="270" height="60" rx="8" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1.2" class="card-rect"/>
+    <g transform="translate(655, 120)" data-card-id="report-ui">
+      <rect width="270" height="65" rx="8" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1.2" class="card-rect"/>
       <text x="15" y="23" class="card-title" fill="#5b21b6">交互缩放与深浅色控制器 (assets/)</text>
       <text x="14" y="42" class="card-desc">CSS 变量双模自适应 · 零依赖无级缩放</text>
     </g>
   </a>
-  <!-- 容器分层：静态证据与引文验证内核 (Analysis &amp; Invariant Verification Kernel) -->
-  <rect x="40" y="215" width="920" height="160" rx="10" stroke-width="1.5" class="layer-container" filter="url(#card-shadow-hubradar)" data-graph-role="container"/>
-  <text x="60" y="239" class="layer-title">静态证据与引文验证内核 (Analysis &amp; Invariant Verification Kernel)</text>
+  <rect x="40" y="269" width="920" height="170" rx="10" stroke-width="1.5" class="layer-container" filter="url(#card-shadow-hubradar)" data-graph-role="container" data-layer-id="analysis"/>
+  <text x="60" y="293" class="layer-title">静态证据与引文验证内核 (Analysis &amp; Invariant Verification Kernel)</text>
   <a class="card-anchor" href="https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/prepare.py#L190-L225" target="_blank" rel="noopener">
-    <g transform="translate(60, 250)">
+    <g transform="translate(75, 309)" data-card-id="prepare">
       <rect width="270" height="110" rx="8" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.2" class="card-rect"/>
       <rect x="12" y="12" width="20" height="20" rx="4" fill="#2563eb"/>
       <text x="22" y="26" text-anchor="middle" class="badge-text">1</text>
       <text x="38" y="26" class="card-title" fill="#1e40af">ast-grep 语法树事实抽取</text>
-      <text x="14" y="48" class="card-desc">多语言 AST census · 调用图与核心文件评…</text>
+      <text x="14" y="48" class="card-desc">多语言 AST census · 调用图与核心文件…</text>
       <rect x="12" y="62" width="246" height="32" rx="4" fill="#eff6ff" stroke="#bae6fd" stroke-width="0.8"/>
-      <text x="20" y="81" class="code-pill">top_defs(root, lang) &amp; nx.DiGraph(…</text>
+      <text x="20" y="81" class="code-pill">top_defs(root, lang) &amp; nx.DiGrap…</text>
     </g>
   </a>
   <a class="card-anchor" href="https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/finalize.py#L53-L88" target="_blank" rel="noopener">
-    <g transform="translate(365, 250)">
+    <g transform="translate(365, 309)" data-card-id="verify">
       <rect width="270" height="110" rx="8" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1.2" class="card-rect"/>
       <rect x="12" y="12" width="20" height="20" rx="4" fill="#7c3aed"/>
       <text x="22" y="26" text-anchor="middle" class="badge-text">2</text>
@@ -152,7 +153,7 @@
     </g>
   </a>
   <a class="card-anchor" href="https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/radar.py#L15-L60" target="_blank" rel="noopener">
-    <g transform="translate(670, 250)">
+    <g transform="translate(655, 309)" data-card-id="radar">
       <rect width="270" height="110" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.2" class="card-rect"/>
       <rect x="12" y="12" width="20" height="20" rx="4" fill="#059669"/>
       <text x="22" y="26" text-anchor="middle" class="badge-text">3</text>
@@ -162,46 +163,48 @@
       <text x="20" y="81" class="code-pill">build_radar(domain_spec)</text>
     </g>
   </a>
-  <!-- 容器分层：矢量渲染与离线打包底座 -->
-  <rect x="40" y="425" width="920" height="200" rx="10" stroke-width="1.5" class="layer-container" filter="url(#card-shadow-hubradar)" data-graph-role="container"/>
-  <text x="60" y="449" class="layer-title">矢量渲染与离线打包底座</text>
+  <rect x="40" y="487" width="920" height="180" rx="10" stroke-width="1.5" class="layer-container" filter="url(#card-shadow-hubradar)" data-graph-role="container" data-layer-id="output"/>
+  <text x="60" y="511" class="layer-title">矢量渲染与离线打包底座</text>
   <a class="card-anchor" href="https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/dsh_architecture.py#L78-L150" target="_blank" rel="noopener">
-    <g transform="translate(60, 460)">
-      <rect width="420" height="145" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.2" class="card-rect"/>
+    <g transform="translate(80, 527)" data-card-id="svg">
+      <rect width="410" height="120" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.2" class="card-rect"/>
       <text x="15" y="23" class="card-title" fill="#166534">DSH 盒模型矢量渲染编译器 (dsh_architecture.py)</text>
-      <text x="14" y="42" class="card-desc">1000px 黄金视口 · 正交连线避让 · 代码药丸与 GitHub SHA 点击直…</text>
-      <rect x="12" y="64" width="396" height="34" rx="4" fill="#ecfdf5" stroke="#bbf7d0" stroke-width="0.8"/>
-      <text x="20" y="83" class="code-pill">generate_dsh_svg(spec_data)</text>
-      <text x="20" y="114" class="card-desc" fill="#166534">原生纯 Python 吸收 · 零外部 Node/CLI 依赖 · ~8KB 极致轻量</text>
+      <text x="14" y="42" class="card-desc">1000px 黄金视口 · 正交连线避让 · 代码药丸与 GitHub SHA 点…</text>
+      <rect x="12" y="56" width="386" height="32" rx="4" fill="#ecfdf5" stroke="#bbf7d0" stroke-width="0.8"/>
+      <text x="20" y="75" class="code-pill">generate_dsh_svg(spec_data)</text>
+      <text x="20" y="104" class="card-desc" fill="#166534">原生纯 Python 吸收 · 零外部 Node/CLI 依赖</text>
     </g>
   </a>
   <a class="card-anchor" href="https://github.com/Li-Sanze/hubradar/blob/93ef1e15c8e79c0a5a337e19624b002ef7906cbb/hubradar/html_report.py#L145-L185" target="_blank" rel="noopener">
-    <g transform="translate(510, 460)">
-      <rect width="430" height="145" rx="8" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1.2" class="card-rect"/>
+    <g transform="translate(510, 527)" data-card-id="html">
+      <rect width="410" height="120" rx="8" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1.2" class="card-rect"/>
       <text x="15" y="23" class="card-title" fill="#5b21b6">单文件离线 HTML 白皮书打包人 (html_report.py)</text>
       <text x="14" y="42" class="card-desc">Markdown 解析 · Bleach 安全占位内联 · 零脚本纯矢量自适应</text>
-      <rect x="12" y="64" width="406" height="34" rx="4" fill="#f5f3ff" stroke="#e9d5ff" stroke-width="0.8"/>
-      <text x="20" y="83" class="code-pill">render_file(card_md, index_html)</text>
-      <text x="20" y="114" class="card-desc" fill="#5b21b6">彻底剥离 3.4MB mermaid.js 强依赖 · 毫秒级加载与离线归档</text>
+      <rect x="12" y="56" width="386" height="32" rx="4" fill="#f5f3ff" stroke="#e9d5ff" stroke-width="0.8"/>
+      <text x="20" y="75" class="code-pill">render_file(card_md, index_html)</text>
+      <text x="20" y="104" class="card-desc" fill="#5b21b6">彻底剥离 3.4MB mermaid.js 强依赖 · 毫秒级加载与离线归档</text>
     </g>
   </a>
-  <line x1="195" y1="175" x2="195" y2="214" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hubradar)" stroke-dasharray="3 3"/>
-  <line x1="500" y1="175" x2="500" y2="214" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hubradar)" stroke-dasharray="3 3"/>
-  <line x1="805" y1="175" x2="805" y2="214" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hubradar)" stroke-dasharray="3 3"/>
-  <line x1="330" y1="305" x2="364" y2="305" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue-hubradar)"/>
-  <line x1="635" y1="305" x2="669" y2="305" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue-hubradar)"/>
-  <polyline points="500,360 500,405 270,405 270,458" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hubradar)"/>
-  <polyline points="500,405 725,405 725,458" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-gray-hubradar)"/>
+  <polyline points="210,185 210,214.14285714285714 210,214.14285714285714 210,309" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-gray-hubradar)" stroke-dasharray="5 4" data-edge-from="cli" data-edge-to="prepare"/>
+  <polyline points="210,185 210,223.28571428571428 500,223.28571428571428 500,309" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-gray-hubradar)" stroke-dasharray="5 4" data-edge-from="cli" data-edge-to="verify"/>
+  <polyline points="210,185 210,232.42857142857142 790,232.42857142857142 790,309" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-gray-hubradar)" stroke-dasharray="5 4" data-edge-from="cli" data-edge-to="radar"/>
+  <polyline points="500,185 500,241.57142857142856 210,241.57142857142856 210,309" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-gray-hubradar)" stroke-dasharray="5 4" data-edge-from="skills" data-edge-to="prepare"/>
+  <polyline points="500,185 500,250.71428571428572 790,250.71428571428572 790,309" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-gray-hubradar)" stroke-dasharray="5 4" data-edge-from="skills" data-edge-to="radar"/>
+  <polyline points="345,364 355,364 355,364 365,364" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-gray-hubradar)" data-edge-from="prepare" data-edge-to="verify"/>
+  <polyline points="500,419 500,451 715,451 715,527" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-gray-hubradar)" data-edge-from="verify" data-edge-to="html"/>
+  <polyline points="790,419 790,463 715,463 715,527" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-gray-hubradar)" data-edge-from="radar" data-edge-to="html"/>
+  <polyline points="490,587 500,587 500,587 510,587" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-gray-hubradar)" data-edge-from="svg" data-edge-to="html"/>
+  <polyline points="715,527 715,475 980,475 980,259.85714285714283 790,259.85714285714283 790,185" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-gray-hubradar)" data-edge-from="html" data-edge-to="report-ui"/>
   <!-- 底部图例 -->
-  <circle cx="60" cy="645" r="5" fill="#2563eb"/>
-  <text x="72" y="649" class="legend-text">接入与呈现 (Presentation &amp; CLI)</text>
-  <circle cx="280" cy="645" r="5" fill="#7c3aed"/>
-  <text x="292" y="649" class="legend-text">静态分析与验证 (Kernel &amp; Verification)</text>
-  <circle cx="500" cy="645" r="5" fill="#059669"/>
-  <text x="512" y="649" class="legend-text">矢量渲染与打包 (Vector &amp; Packaging)</text>
-  <circle cx="720" cy="645" r="5" fill="#64748b"/>
-  <text x="732" y="649" class="legend-text">点击直达 GitHub 源码提交行 (Click-to-Source)</text>
-  <text x="500" y="664" text-anchor="middle" class="footer-note">纯 Python 原生吸收 · 零 Node/CLI 外部依赖 · 节点点击直达 GitHub 93ef1e1 源码提交行 · 纯矢量 ~10KB</text>
+  <circle cx="40" cy="684" r="5" fill="#2563eb"/>
+  <text x="52" y="688" class="legend-text">接入与呈现 (Presentation &amp; CLI)</text>
+  <circle cx="260" cy="684" r="5" fill="#7c3aed"/>
+  <text x="272" y="688" class="legend-text">静态分析与验证 (Kernel &amp; Verification)</text>
+  <circle cx="480" cy="684" r="5" fill="#059669"/>
+  <text x="492" y="688" class="legend-text">矢量渲染与打包 (Vector &amp; Packaging)</text>
+  <circle cx="700" cy="684" r="5" fill="#64748b"/>
+  <text x="712" y="688" class="legend-text">点击直达 GitHub 源码提交行 (Click-to-Source)</text>
+  <text x="500" y="706" text-anchor="middle" class="footer-note">纯 Python 原生吸收 · 零 Node/CLI 外部依赖 · 节点点击直达 GitHub 93ef1e1 源码提交行</text>
 </svg></div></div></div><details><summary>查看 Mermaid 原始备用流图</summary>
 <div class="diagram-card" data-diagram-status="pending"><div class="diagram-bar"><span class="diagram-status" role="status">正在排版…</span><div class="diagram-controls"><label>布局 <select class="diagram-layout" aria-label="图形布局"><option value="auto">自动适配</option><option value="original">原始方向</option></select></label><button type="button" data-zoom="-0.2" aria-label="缩小图形">−</button><button type="button" data-zoom="0" aria-label="适应容器">适应</button><button type="button" data-zoom="0.2" aria-label="放大图形">＋</button></div></div><div class="diagram-scroll" tabindex="0" aria-label="可缩放的 Mermaid 图"><div class="mermaid-target" aria-busy="true"></div></div><noscript><p>请启用 JavaScript 使用内置 Mermaid 排版；源码仍可阅读。</p></noscript><details class="diagram-source"><summary>查看 Mermaid 源码</summary><pre><code class="language-mermaid">flowchart LR
   cli[&quot;统一 CLI 懒加载网关 (cli.py)&quot;]
@@ -4111,7 +4114,10 @@ globalThis["mermaid"] = globalThis.__esbuild_esm_mermaid_nm["mermaid"].default;
       const dark = document.documentElement.dataset.theme === "dark";
       if (diagramCards.length && window.mermaid) window.mermaid.initialize(diagramConfig(dark));
       for (const card of diagramCards) {
-        if (card.classList.contains("dsh-architecture")) continue;
+        if (card.classList.contains("dsh-architecture")) {
+          fitDiagram(card);
+          continue;
+        }
         if (generation !== renderGeneration) return;
         const target = card.querySelector(".mermaid-target"), status = card.querySelector(".diagram-status");
         target.setAttribute("aria-busy", "true");
