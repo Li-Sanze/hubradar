@@ -12,6 +12,7 @@ import hashlib
 import json
 import math
 import re
+from collections import defaultdict
 from copy import deepcopy
 from typing import Any, Dict, Optional
 
@@ -210,9 +211,10 @@ def compile_dsh_spec(spec: Dict[str, Any]) -> Dict[str, Any]:
         group = lanes[boundary]
         return top + gap * (group[edge_index] + 1) / (len(group) + 1)
 
-    def port_to_lane(node: dict, lane: float, downward: bool) -> list:
+    def port_to_lane(node: dict, lane: float, downward: bool, custom_x: float = None) -> list:
         """Leave a wrapped row through its side margin if another card blocks it."""
-        x, y = node["center_x"], node["bottom"] if downward else node["top"]
+        x = custom_x if custom_x is not None else node["center_x"]
+        y = node["bottom"] if downward else node["top"]
         peers = [c for c in card_index.values() if c is not node and c["layer"] == node["layer"]]
         blocked = any(c["left"] < x < c["right"] and c["top"] < max(y, lane)
                       and c["bottom"] > min(y, lane) for c in peers)
@@ -223,6 +225,30 @@ def compile_dsh_spec(spec: Dict[str, Any]) -> Dict[str, Any]:
         layer = layers[node["layer"]]
         side = layer["x"] + (10 if x < layer["x"] + layer["width"] / 2 else layer["width"] - 10)
         return [[x, y], [x, bend], [side, bend], [side, lane]]
+
+    inter_out = defaultdict(list)
+    inter_in = defaultdict(list)
+    for ei, edge in enumerate(edges):
+        src, dst = card_index[edge["from"]], card_index[edge["to"]]
+        if src["layer"] != dst["layer"]:
+            inter_out[edge["from"]].append((dst["center_x"], ei))
+            inter_in[edge["to"]].append((src["center_x"], ei))
+
+    edge_exit_x = {}
+    for cid, items in inter_out.items():
+        node = card_index[cid]
+        items.sort(key=lambda t: t[0])
+        count = len(items)
+        for rank, (_, ei) in enumerate(items):
+            edge_exit_x[ei] = node["left"] + node["w"] * (rank + 1) / (count + 1)
+
+    edge_entry_x = {}
+    for cid, items in inter_in.items():
+        node = card_index[cid]
+        items.sort(key=lambda t: t[0])
+        count = len(items)
+        for rank, (_, ei) in enumerate(items):
+            edge_entry_x[ei] = node["left"] + node["w"] * (rank + 1) / (count + 1)
 
     connectors = result.setdefault("connectors", [])
     if not isinstance(connectors, list):
@@ -248,8 +274,10 @@ def compile_dsh_spec(spec: Dict[str, Any]) -> Dict[str, Any]:
             down = si < ti
             exit_lane = lane_y(si if down else si - 1, ei)
             entry_lane = lane_y(ti - 1 if down else ti, ei)
-            points = port_to_lane(source, exit_lane, down)
-            target_points = list(reversed(port_to_lane(target, entry_lane, not down)))
+            exit_x = edge_exit_x.get(ei, source["center_x"])
+            entry_x = edge_entry_x.get(ei, target["center_x"])
+            points = port_to_lane(source, exit_lane, down, exit_x)
+            target_points = list(reversed(port_to_lane(target, entry_lane, not down, entry_x)))
             if abs(si - ti) > 1:
                 # Skip intermediate layers via the outer margin, not their cards.
                 side = 20 if source["center_x"] < 500 else 980
